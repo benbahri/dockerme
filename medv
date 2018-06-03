@@ -1,0 +1,1143 @@
+#!/bin/bash
+DOCKER_LOG="/var/log/medv_docker";
+DOCKER_LOG_TMP="/var/log/.medv_docker";
+VPS_LOG="/var/log/medv_vps";
+d=`date +"%Y-%m-%d %T"`
+D=`date "+%Y%m%d%H%M%S"`
+
+
+if  [ " $1 " = " docker " ];
+then
+    if  [[ " $2 " = " -i " ]] && [[ -z "$3" ]];
+    then
+        echo " ------------INSTALLING MEDV DOCKER SYSTEM REQUIREMENTS-------------- "
+        installer()
+        {
+        read -p "Do you want to install medv docker system in your machine? (Y/n) " Y
+        while :
+        do
+            case $Y in Y|y)
+                sudo -s
+                if [ $? -eq 0 ];
+                then
+                    apt-get update -y
+                    apt-get upgrade -y
+                    apt-get install git zip unzip
+                    software-properties-common
+                    apt-get install -y\
+                    apt-transport-https \
+                    ca-certificates \
+                    curl \
+                    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -  
+                    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" 
+                    apt-get update 
+                    apt-get install -y docker-ce 
+                    apt-cache madison docker-ce 
+                    usermod -aG docker ${USER} 
+                    curl -L https://github.com/docker/compose/releases/download/1.21.0-rc1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose
+                    chmod +x /usr/local/bin/docker-compose
+                    echo $d `users` ": [SUCCESS] : Installing up docker utility" >> $DOCKER_LOG.log
+                    echo $d `users` ": [SUCCESS] : Setting up docker-compose" >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Installing up docker utility" >> $DOCKER_LOG.log
+                    echo $d `users` ": [ERROR] : Setting up docker-compose" >> $DOCKER_LOG.log
+                    exit
+                fi
+                if [ ! -d /var/medv ];
+                then
+                    mkdir /var/medv 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Creating /var/medv directory" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Creating /var/medv : not working!" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                else
+                    echo $d `users` ": [NOTICE] : Creating /var/medv : The directory is existe!" >> $DOCKER_LOG.log
+                fi
+                cd /var/medv 2>> $DOCKER_LOG.log
+                git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml 2>> $DOCKER_LOG.log
+                if [ $? -eq 0 ];
+                then
+                    echo $d `users` ": [SUCCESS] : Cloning YML form git server under /var/medv/yml" >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Cloning YML form git server under /var/medv/yml : not working!" >> $DOCKER_LOG.log
+                    exit
+                fi
+                cd /var/medv/ 2>> $DOCKER_LOG.log
+                if [ $? -eq 0 ];
+                then
+                    echo $d `users` ": [SUCCESS] : Changing directory /var/medv/" >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Changing directory /var/medv/ : not working!" >> $DOCKER_LOG.log
+                    exit
+                fi
+                touch medv_docker.conf 2>> $DOCKER_LOG.log
+                if [ $? -eq 0 ];
+                then
+                    echo $d `users` ": [SUCCESS] : Creating configuration file /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Creating configuration file /var/medv/medv_docker.conf " >> $DOCKER_LOG.log
+                    exit
+                fi
+                read -p "Please provide an absolute path, where you want to put your medv docker system websites: " $DIRECTORY
+                mkdir -p $DIRECTORY 2>> $DOCKER_LOG.log
+                if [ $? -eq 0 ];
+                then
+                    echo $d `users` ": [SUCCESS] : Setting up medv docker system home path directory under $DIRECTORY " >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Setting up medv docker system home path directory under $DIRECTORY " >> $DOCKER_LOG.log
+                    exit
+                fi
+                echo "HOME_PATH_DIRECTORY=$DIRECTORY" >> medv_docker.conf
+                echo $d  `users` ": [SUCCESS] : Setting up  $DIRECTORY " >> $DOCKER_LOG.log
+                echo "Installation medv docker system successful "
+                echo "Setting up medv docker system home directory under $DIRECTORY"
+                echo " --------------------CREATING NGINX-PROXY AND PORTAINER CONTAINERS--------------------------- "
+                read -p "Do you want to create NGINX-PROXY container? (Y/n) " Y
+                if [ " $Y " = " Y " ] ||  [ " $Y " = " y " ];
+                then
+                        sudo docker run --name nginx-proxy -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro -v nginx_data:/data -d jwilder/nginx-proxy
+                        if [ $? -eq 0 ];
+                        then
+                            echo $d `users` ": [SUCCESS] : Creating NGINX-PROXY" >> $DOCKER_LOG.log
+                        else
+                            echo $d `users` ": [ERROR] : Creating NGINX-PROXY" >> $DOCKER_LOG.log
+                            exit
+                        fi
+                        sudo docker restart nginx-proxy
+                        if [ $? -eq 0 ];
+                        then
+                            echo $d `users` ": [SUCCESS] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                        else
+                            echo $d `users` ": [ERROR] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                            exit
+                        fi
+                elif [ " $Y " = " N " ] ||  [ " $Y " = " n " ];
+                then
+                        echo $d `users` ": [ERROR] : Has choosing to not run NGINX-PROXY with medv docker system"  >> $DOCKER_LOG.log
+                        echo  "Has choosing to not run NGINX-PROXY with medv docker system"
+                else 
+                        exit
+                fi
+                read -p "Do you want to create PORTAINER container? (Y/n) " Y
+                if [ " $Y " = " Y " ] ||  [ " $Y " = " y " ];
+                then
+                        sudo docker run --name portainer -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -d portainer/portainer
+                            if [ $? -eq 0 ];
+                            then
+                                echo $d `users` ": [SUCCESS] : Creating PORTAINER container" >> $DOCKER_LOG.log
+                            else
+                                echo $d `users` ": [ERROR] : Creating PORTAINER container" >> $DOCKER_LOG.log
+                                exit
+                            fi
+                        sudo docker restart portainer
+                            if [ $? -eq 0 ];
+                            then
+                                echo $d `users` ": [SUCCESS] : Restarting PORTAINER container" >> $DOCKER_LOG.log
+                            else
+                                echo $d `users` ": [ERROR] : Restarting PORTAINER container" >> $DOCKER_LOG.log
+                                exit
+                            fi
+                elif [ " $Y " = " N " ] ||  [ " $Y " = " n " ];
+                then
+                        echo $d `users` ": [ERROR] : Has choosing to not run PORTAINER with medv docker system" >> $DOCKER_LOG.log
+                        echo "Has choosing to not run PORTAINER with medv docker system" 
+                else 
+                        exit
+                fi                   
+                sudo docker ps -a
+                        if [ $? -eq 0 ];
+                        then
+                            echo $d `users` ": [SUCCESS] : Listing containers" >> $DOCKER_LOG.log
+                        else
+                            echo $d `users` ": [ERROR] : Listing containers" >> $DOCKER_LOG.log
+                            exit
+                        fi
+                exit
+                ;;
+                N|n)
+                echo "Installation medv docker system has been canceled"
+                echo $d `users` ": [ERROR] : Installation medv docker system has been canceled" >> $DOCKER_LOG.log
+                echo $d `users` ": [ERROR] : Installation docker-compose has been canceled" >> $DOCKER_LOG.log
+                exit
+                ;;
+                *)
+                echo "Please enter (Y/n)"
+                exit
+                ;;
+            esac
+        done
+        }
+        installer
+        echo " ----------END INSTALLING DOCKER SYSTEM REQUIREMENTS------------ "
+    elif [[ " $2 " = *"-yml"* ]] && [[ " $3 " = *"--list"* ]] && [[ -z "$4" ]];
+    then
+        if [ ! -d /var/medv/yml ];
+        then
+            echo $d `users` ": [ERROR] : YML directory not found " >> $DOCKER_LOG.log
+            echo "/var/medv/yml : directory not found!"
+        else
+            ls -1 /var/medv/yml 2>> $DOCKER_LOG.log
+                if [ $? -eq 0 ];
+                then
+                    echo $d `users` ": [SUCCESS] : Listing YML directory" >> $DOCKER_LOG.log
+                else
+                    echo $d `users` ": [ERROR] : Listing YML directory" >> $DOCKER_LOG.log
+                    exit
+                fi
+        fi
+    elif [[ " $2 " = *"-yml"* ]] && [[ " $3 " = *"--update"* ]] && [[ -z "$4" ]];
+    then
+        cd /var/medv 2>> $DOCKER_LOG.log
+        rm -r yml 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Deleting YML directory" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Deleting YML directory" >> $DOCKER_LOG.log
+                exit
+            fi
+        git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Updating YML directory form mdev server" >> $DOCKER_LOG.log
+                echo "Updating YML directory form mdev server"
+            else
+                echo $d `users` ": [ERROR] : Updating YML directory form mdev server" >> $DOCKER_LOG.log
+                exit
+            fi
+    elif [[ " $2 " = *"-c"* ]] && [[ -n "$3" ]] && [[ -n "$4" ]] && [[ -z "$5" ]];
+    then
+        echo " ------------CREATING CONTAINER-------------- "
+        . /var/medv/medv_docker.conf
+        if [ ! "$(docker ps -q -f name=nginx-proxy)" ];
+        then
+            echo " ------------------INSTALLATION OF NGNX-PROXY------------------"
+            read -p "Do you want to install nginx-proxy in your machine? (Y/n) " Y
+            while :
+            do
+                case $Y in
+                    Y|y)
+                    docker run --name nginx-proxy -d -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Creating NGINX-PROXY" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Creating NGINX-PROXY" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    read -p "Do you want to host locally this domain name? (Y/n)" Y
+                    while :
+                    do
+                        case $Y in Y|y)
+                            if [ ! -d $HOME_PATH_DIRECTORY/$3 ];
+                            then
+                                echo $d `users` ": [NOTICE] ; Domain name not found!" >> $DOCKER_LOG.log
+                                if [ ! -f /var/medv/yml/$4 ];
+                                then
+                                    echo $d `users` ": [ERROR] : $4 : not found!" >> $DOCKER_LOG.log
+                                    ls /var/medv/yml 2>> $DOCKER_LOG.log
+                                    if [ $? -eq 0 ];
+                                    then
+                                        echo $d `users` ": [SUCCESS] : Listing YML file" >> $DOCKER_LOG.log
+                                    else
+                                        echo $d `users` ": [ERROR] : Listing YML file " >> $DOCKER_LOG.log
+                                        exit
+                                    fi
+                                else
+                                    cd $HOME_PATH_DIRECTORY 2>> $DOCKER_LOG.log
+                                    if [ $? -eq 0 ];then
+                                    echo $d `users` ": [SUCCESS] : Changing directory to $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Changing directory to $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                mkdir $3 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Creating $3 directory" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Creating $3 directory" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                cd $3 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Changing directory to $3" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Changing directory to $3 " >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                touch docker-compose.yml 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Creating empty file : $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Creating empty file : $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                cat /var/medv/yml/$4 > $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : building $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : building $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                sudo sed -i -e  's/$host/'$3'/g' $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Replacing HOST variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Replacing HOST variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                sudo sed -i -e 's|$path|'$HOME_PATH_DIRECTORY'|g' $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Replacing PATH variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Replacing PATH variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                                docker-compose up -d
+                                if [ $? -eq 0 ];
+                                then
+                                    echo $d `users` ": [SUCCESS] : Starting $3" >> $DOCKER_LOG.log
+                                else
+                                    echo $d `users` ": [ERROR] : Starting $3 " >> $DOCKER_LOG.log
+                                    exit
+                                fi
+                            fi
+                            echo "127.0.0.1   $3" >> /etc/hosts
+                            echo "127.0.0.1   www.$3" >> /etc/hosts
+                            echo "127.0.0.1   phpmyadmin.$3" >> /etc/hosts
+                            echo $d `users` ": [SUCCESS] : Domain name created in /etc/hosts " >> $DOCKER_LOG.log
+                            echo " ------------------RESTART OF NGINX-PROXY------------------ "
+                            if [ $? -eq 0 ];
+                            then
+                                echo $d `users` ": [SUCCESS] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                            else
+                                echo $d `users` ": [ERROR] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                                exit
+                            fi
+                            echo "Hosting $3 successfully completed"
+                        else
+                            echo "Your domain name already exists!"
+                            echo $d `users` ": [NOTICE] : Domain name already exist" >> $DOCKER_LOG.log
+                        fi
+                        exit
+                        ;;
+                        n|N)
+                        echo $d `users` ": [ERROR] : Hosting website $3 locally has been cancelled" >> $DOCKER_LOG.log
+                        echo "Hosting website $3 locally has been cancelled"
+                        exit
+                        ;;
+                        *)
+                        echo "Please enter (Y/n)"
+                        exit
+                        ;;
+                    esac
+                done
+                exit
+                ;;
+                N|n)
+                        echo $d `users` ": [ERROR] : Has choosing to not run NGINX-PROXY with medv docker system"  >> $DOCKER_LOG.log
+                        echo  "Has choosing to not run NGINX-PROXY with medv docker system"
+                exit
+                ;;
+                *)
+                echo
+                echo "Please enter (Y/n)"
+                exit
+                ;;
+            esac
+        done
+        exit
+    else
+        read -p "Do you want to host locally this domain name? (Y/n) " Y
+        while :
+        do
+            case $Y in Y|y)
+                if [ ! -d $HOME_PATH_DIRECTORY/$3 ];
+                then
+                    echo $d `users` ": [NOTICE] : Domain name not found!" >> $DOCKER_LOG.log
+                    if [ ! -f /var/medv/yml/$4 ];
+                    then
+                    echo $d `users` ": [ERROR] : $4 : not found" >> $DOCKER_LOG.log
+                    ls /var/medv/yml 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Listing YML file" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Listing YML file" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                else
+                    cd $HOME_PATH_DIRECTORY 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Changing directory to $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Changing directory to $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    mkdir $3 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Creating $3 directory" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Creating $3 directory" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    cd $3 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Changing directory to $3" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Changing directory to $3" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    touch docker-compose.yml 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Changing empty file : $3/docker-compose.yml" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Changing empty file : $3/docker-compose.yml" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    cat /var/medv/yml/$4 > $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : building $3/docker-compose.yml" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : building $3/docker-compose.yml" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    sudo sed -i -e  's/$host/'$3'/g' $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Replacing HOST variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Replacing HOST variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    sudo sed -i -e 's|$path|'$HOME_PATH_DIRECTORY'|g' $HOME_PATH_DIRECTORY/$3/docker-compose.yml 2>> $DOCKER_LOG.log
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Replacing PATH variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Replacing PATH variables in $3/docker-compose.yml" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    docker-compose up -d
+                    if [ $? -eq 0 ];
+                    then
+                        echo $d `users` ": [SUCCESS] : Starting $3" >> $DOCKER_LOG.log
+                    else
+                        echo $d `users` ": [ERROR] : Starting $3" >> $DOCKER_LOG.log
+                        exit
+                    fi
+                    echo "#Start Docker Website $3" >> /etc/hosts 
+                    echo "127.0.0.1   $3" >> /etc/hosts 
+                    echo "127.0.0.1   www.$3" >> /etc/hosts
+                    echo "127.0.0.1   phpmyadmin.$3" >> /etc/hosts
+                    echo "#End Docker Website $3" >> /etc/hosts 
+                    echo $d `users` ": [SUCCESS] : Domain name created in /etc/hosts " >> $DOCKER_LOG.log
+                    echo " ------------------RESTART OF NGINX-PROXY------------------ "
+                    docker restart  nginx-proxy 
+                        if [ $? -eq 0 ];
+                        then
+                            echo $d `users` ": [SUCCESS] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                        else
+                            echo $d `users` ": [ERROR] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+                            exit
+                        fi
+                    echo "Hosting $3 successfully completed"
+                fi
+            else
+                echo "Your domain name already exists!"
+                echo $d `users` ": [NOTICE] : Domain name already exist" >> $DOCKER_LOG.log
+            fi
+            exit
+            ;;
+            n|N)
+            echo $d `users` "Hosting website $3 locally has been cancelled" >> $DOCKER_LOG.log
+            echo "Hosting website $3 locally has been cancelled"
+            exit
+            ;;
+            *)
+            echo "Please enter (Y/n)"
+            exit
+            ;;
+        esac
+    done
+fi
+echo " ----------END CREATING CONTAINER------------ "
+elif [[ " $2 " = *" -b "* ]] && [[ " $3 " = *" -s "* ]] && [[ -n "$4" ]] && [[ -z "$5" ]];
+then
+echo " ------------BACKUPING CONTAINER-------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$4"
+SITE="$4"
+backup()
+{
+if [ ! -d $WEBSITE_HOME ];
+then
+    echo $d `users` ": [NOTICE] : Domain name : $4 not found!" >> $DOCKER_LOG.log
+    echo "Domain name : $4 not found!"
+else
+    read -p "Take a choise for your scheduled: hourly: 1 daily: 2 " SCHEDULED
+    cd $WEBSITE_HOME 2>> $DOCKER_LOG.log
+    
+    if [ ! -d backup ];
+    then
+        mkdir backup 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Creating backup directory $WEBSITE_HOME/backup" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Creating backup directory $WEBSITE_HOME/backup" >> $DOCKER_LOG.log
+        fi
+    else
+        echo $d `users` ": [NOTICE] : Backup directory $WEBSITE_HOME/backup already exist!" >> $DOCKER_LOG.log
+    fi
+    sudo docker-compose stop
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Stopping $SITE's containers" >> $DOCKER_LOG.log
+    else
+        echo $d `users` ": [ERROR] : Stopping $SITE's containers" >> $DOCKER_LOG.log
+    fi
+    cd .. 2>> $DOCKER_LOG.log
+    zip -r $D.zip $SITE -x '*backup/*' -x '*.yml*' 2>> $DOCKER_LOG.log
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Compressing $SITE's directories" >> $DOCKER_LOG.log
+    else
+        echo $d `users` ": [ERROR] : Compressing $SITE's directories" >> $DOCKER_LOG.log
+    fi
+    mv $D.zip $WEBSITE_HOME/backup 2>> $DOCKER_LOG.log
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Mooving $SITE's backups under correct directory" >> $DOCKER_LOG.log
+    else
+        echo $d `users` ": [ERROR] : Mooving $SITE's backups under correct directory" >> $DOCKER_LOG.log
+    fi
+    cd $SITE 2>> $DOCKER_LOG.log
+    if [ $? -eq 0 ];
+    then
+        echo "";
+    else
+        echo $d `users` ": [ERROR] : Changing directory to $SITE " >> $DOCKER_LOG.log
+    fi
+    sudo docker-compose start
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Restarting $SITE's containers" >> $DOCKER_LOG.log
+    else
+        echo $d `users` ": [ERROR] : Restarting $SITE's containers" >> $DOCKER_LOG.log
+    fi
+fi
+find $WEBSITE_HOME/backup/* -mtime +7 -exec rm {} \; 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Deleting backup file of the week from $SITE" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Deleting backup file of the week from $SITE" >> $DOCKER_LOG.log
+    exit
+fi
+case $SCHEDULED in
+1)
+crontab -l > /home/`users`/.medv_scheduled.tmp 
+echo "0 * * * * /usr/bin/medv docker -b -s $SITE " >> /home/`users`/.medv_scheduled.tmp  
+crontab /home/`users`/.medv_scheduled.tmp 
+rm /home/`users`/.medv_scheduled.tmp 
+;;
+2)
+crontab -l > /home/`users`/.medv_scheduled.tmp 
+echo "0 6 * * * /usr/bin/medv docker -b -s $SITE " >> /home/`users`/.medv_scheduled.tmp  
+crontab /home/`users`/.medv_scheduled.tmp  
+rm /home/`users`/.medv_scheduled.tmp 
+;;
+esac
+}
+backup
+echo " ----------END BACKUPING CONTAINER------------ "
+elif [[ " $2 " = *"-b"* ]] && [[ " $3 " = *"-s"* ]] && [[ " $4 " = *"--list"* ]] && [[ -n "$5" ]] && [[ -z "$6" ]];
+then
+echo " ---------------VIEWING SCHEDULED FILE---------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$5"
+view()
+{
+if [ ! -d $WEBSITE_HOME ];
+        then
+            echo $d `users` ": [NOTICE] : Domain name : $5 not found!" >> $DOCKER_LOG.log
+            echo "Domain name : $5 not found!"
+        else
+crontab -u root -l | grep "$5"
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Listing scheduled file" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Listing scheduled file" >> $DOCKER_LOG.log
+fi
+fi
+}
+view
+echo " ---------------END VIEWING SCHEDULED FILE---------------- "
+elif [[ " $2 " = *"-b"* ]] && [[ " $3 " = *"-s"* ]] && [[ " $4 " = *"--add"* ]] && [[ -n "$5" ]] && [[ -z "$6" ]];
+then
+echo " ---------------ADDING SCHEDULED FILE---------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$5"
+adding()
+{
+if [ ! -d $WEBSITE_HOME ];
+        then
+            echo $d `users` ": [NOTICE] : Domain name : $5 not found!" >> $DOCKER_LOG.log
+            echo "Domain name : $3 not found!"
+        else
+read -p "Take a choise for your schedule: hourly: 1 daily: 2 " SCHEDULED
+case $SCHEDULED in
+1)
+read -p "Give your time: " SCHEDULED_TIME
+crontab -l > /home/`users`/.medv_scheduled.tmp
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Mooving content to .medv_scheduled.tmp" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Mooving content to .medv_scheduled.tmp" >> $DOCKER_LOG.log
+    exit
+fi
+echo "$SCHEDULED_TIME /usr/bin/medv docker -b -s $5 " >> /home/`users`/.medv_scheduled.tmp  
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Writing scheduled for $SITE" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Writing scheduled for $SITE" >> $DOCKER_LOG.log
+    exit
+fi
+crontab /home/`users`/.medv_scheduled.tmp  
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Adding scheduled for $SITE" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Adding scheduled from $SITE" >> $DOCKER_LOG.log
+    exit
+fi
+rm /home/`users`/.medv_scheduled.tmp 
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Deleting file .medv_scheduled.tmp" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Deleting file .medv_scheduled.tmp" >> $DOCKER_LOG.log
+    exit
+fi
+;;
+2)
+read -p "Give your time: " SCHEDULED_TIME
+crontab -l > /home/`users`/.medv_scheduled.tmp
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Mooving content to .medv_scheduled.tmp" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Mooving content to .medv_scheduled.tmp" >> $DOCKER_LOG.log
+    exit
+fi
+echo "$SCHEDULED_TIME /usr/bin/medv docker -b -s $5 " >> /home/`users`/.medv_scheduled.tmp  
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Writing scheduled for $SITE" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Writing scheduled for $SITE" >> $DOCKER_LOG.log
+    exit
+fi
+crontab /home/`users`/.medv_scheduled.tmp  
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Adding scheduled for $SITE" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Adding scheduled from $SITE" >> $DOCKER_LOG.log
+    exit
+fi
+rm /home/`users`/.medv_scheduled.tmp 
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Deleting file .medv_scheduled.tmp" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Deleting file .medv_scheduled.tmp" >> $DOCKER_LOG.log
+    exit
+fi
+;;
+esac
+fi
+}
+adding
+echo " ---------------END ADDING SCHEDULED FILE---------------- "
+elif [[ " $2 " = *"-b"* ]] && [[ " $3 " = *"-s"* ]] && [[ " $4 " = *"--delete"* ]] && [[ -n "$5" ]] && [[ -z "$6" ]];
+then
+echo " ---------------DELETING SCHEDULED FILE---------------- "
+crontab -u root -l | grep -v "$5"  | crontab -u root -
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Deleting scheduled from $5" >> $DOCKER_LOG.log
+    echo "Deleting scheduled from $5"
+else
+    echo $d `users` ": [ERROR] : Deleting scheduled from $5" >> $DOCKER_LOG.log
+    echo "Deleting scheduled from $5"
+    exit
+fi
+echo " ---------------END DELETING SCHEDULED FILE----------------"
+elif [[ " $2 " = *"-r"* ]]  && [[ -n "$3" ]] && [[ " $4 " = *"--list"* ]] && [[ -z "$5" ]];
+then
+echo " ---------------VIEWING BACKUP FILE---------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$3"
+if [ ! -d $WEBSITE_HOME ];
+then
+    echo $d `users` ": [NOTICE] : Domain name : $3 not found!" >> $DOCKER_LOG.log
+    echo "Domain name : $3 not found!"
+else
+    echo $d `users` ": [SUCCESS] : Directory $3 exist. " >> $DOCKER_LOG.log
+    ls -1 $HOME_PATH_DIRECTORY/"$3"/backup 2>> $DOCKER_LOG.log
+fi
+echo " --------------END VIEWING BACKUP FILE------------ "
+elif [[ " $2 " = *"-r"* ]]  && [[ -n "$3" ]] && [[ -n "$4" ]] && [[ -z "$5" ]];
+then
+echo " ---------------RESTOING BACKUP---------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$3"
+SITE="$3"
+ZIP_FILE="$4"
+restore()
+{
+if [ ! -d $WEBSITE_HOME ];
+then
+    echo $d `users` ": [NOTICE] : Domain name : $SITE not found!" >> $DOCKER_LOG.log
+    echo "Domain name : $SITE not found!"
+else
+    read -p " Do you want to restore a backup? (Y/n) " Y
+    while :
+    do
+        case $Y in Y|y)
+            cd $WEBSITE_HOME 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo"";
+            else
+                echo $d `users` ": [ERROR] : Changing directory to $SITE" >> $DOCKER_LOG.log
+            fi
+            docker-compose stop
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Restarting $SITE's containers" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Restarting $SITE's containers" >> $DOCKER_LOG.log
+            fi
+            find -maxdepth 1 ! -name backup ! -name docker-compose.yml ! -name . -exec rm -rv {} \; 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Deleting content $SITE" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Deleting content $SITE" >> $DOCKER_LOG.log
+            fi
+            cd backup/ 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo "";
+            else
+                echo $d `users` ": [ERROR] : Changing directory to /backup" >> $DOCKER_LOG.log
+            fi
+            unzip $ZIP_FILE -d $WEBSITE_HOME 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Extracting $ZIP_FILE in $WEBSITE_HOME" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Extracting $ZIP_FILE in $WEBSITE_HOME" >> $DOCKER_LOG.log
+            fi
+            cd ..
+            cd $SITE 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo"";
+            else
+                echo $d `users` ": [ERROR] : Changing directory to $SITE" >> $DOCKER_LOG.log
+            fi
+            mv * $WEBSITE_HOME 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Mooving directory to $WEBSITE_HOME" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Mooving directory to $WEBSITE_HOME" >> $DOCKER_LOG.log
+            fi
+            cd ..
+            sudo rm -rf $SITE 2>> $DOCKER_LOG.log
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Deleting directory $SITE" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Deleting directory $SITE" >> $DOCKER_LOG.log
+            fi
+            docker-compose up -d
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Restarting $SITE containers" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Restarting $SITE containers" >> $DOCKER_LOG.log
+            fi
+            echo " ------------------RESTART OF NGINX-PROXY------------------ "
+            docker restart  nginx-proxy
+            if [ $? -eq 0 ];
+            then
+                echo $d `users` ": [SUCCESS] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+            else
+                echo $d `users` ": [ERROR] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+            fi
+            exit
+            ;;
+            n|N)
+            echo $d `users` ": [ERROR] : Restoring website $3 locally has been cancelled" >> $DOCKER_LOG.log
+            echo "Restoring website $3 locally has been cancelled"
+            exit
+            ;;
+            *)
+            echo "Please enter (Y/n)"
+            exit
+            ;;
+        esac
+    done
+fi
+}
+restore
+echo " --------------END RESTORING BACKUP------------ "
+elif [[ " $2 " = *"-log"* ]] && [[ " $3 " = *"--view"* ]] && [[ -z "$4" ]];
+then
+echo " ---------------VIEWING LOG FILE---------------- "
+tail -f /var/log/medv_docker.log 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Showing file log" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Showing file log" >> $DOCKER_LOG.log
+    exit
+fi
+echo " --------------END VIEWING LOG FILE------------ "
+elif [[ "$2" = *"-start"* ]] && [[ -n " $3 " ]] && [[ -z "$4" ]];
+then
+. /var/medv/medv_docker.conf
+LOCAL_DIRECTORY=$HOME_PATH_DIRECTORY/"$3"
+cd $LOCAL_DIRECTORY 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    docker-compose up -d
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Startting website : $3 successfully" >> $DOCKER_LOG.log
+        echo "Startting website : $3 successfully"
+    fi
+else
+    echo $d `users` ": [ERROR] : Trying to start website : $3, but directory doesen't exist" >> $DOCKER_LOG.log
+    echo "Error ! directory : $3 doesen't exist"
+    exit
+fi
+elif [[ "$2" = *"-stop"* ]] && [[ -n " $3 " ]] && [[ -z "$4" ]];
+then
+. /var/medv/medv_docker.conf
+LOCAL_DIRECTORY=$HOME_PATH_DIRECTORY/"$3"
+cd $LOCAL_DIRECTORY 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    docker-compose down
+    if [ $? -eq 0 ];
+    then
+        echo $d `users` ": [SUCCESS] : Stopping website : $3 successfully" >> $DOCKER_LOG.log
+        echo "Stopping website : $3 successfully"
+    fi
+else
+    echo $d `users` ": [ERROR] : Trying to stop website : $3, but directory doesen't exist" >> $DOCKER_LOG.log
+    echo "Error ! directory $3 doesen't exist"
+    exit
+fi
+elif [[ " $2 " = *"-log"* ]] && [[ " $3 " = *"--trancate"* ]] && [[ -z "$4" ]];
+then
+echo " ---------------TRACATING LOG FILE---------------- "
+truncate -s 0 /var/log/medv_docker.log 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Trancating file log in /var/log/medv_docker.log" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Trancating file log in /var/log/medv_docker.log" >> $DOCKER_LOG.log
+    exit
+fi
+echo " --------------END TRANCATING LOG FILE------------ "
+elif [[ " $2 " = *"-config"* ]] && [[ " $3 " = *"--view"* ]] && [[ -z "$4" ]];
+then
+echo " ---------------VIEWING CONFIG FILE---------------- "
+tail -f /var/medv/medv_docker.conf 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Showing config file in /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Showing config file in /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+    exit
+fi
+echo " --------------END VIEWING CONFIG FILE------------ "
+elif [[ " $2 " = *"-config"* ]] && [[ " $3 " = *"--edit"* ]] && [[ -z "$4" ]];
+then
+echo " ---------------EDITING CONFIG FILE---------------- "
+nano /var/medv/medv_docker.conf 2>> $DOCKER_LOG.log
+if [ $? -eq 0 ];
+then
+    echo $d `users` ": [SUCCESS] : Editing config file in /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+else
+    echo $d `users` ": [ERROR] : Editing config file in /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+    exit
+fi
+echo " --------------END EDITING CONFIG FILE------------ "
+elif [[ " $2 " = " -rm " ]]  && [[ -n "$3" ]] && [[ -z "$4" ]];
+then
+echo " ---------------REMOVING CONTAINER----------------- "
+. /var/medv/medv_docker.conf
+WEBSITE_HOME=$HOME_PATH_DIRECTORY/"$3"/
+if [ ! -d $WEBSITE_HOME ];
+then
+    echo $d `users` ": [NOTICE] : Domain name : $3 not found!" >> $DOCKER_LOG.log
+    echo "Domain name : $3 not found!"
+else
+read -p " Do you want to remove containers ? (Y/n) " Y
+while :
+do
+    case $Y in Y|y)
+        cd $HOME_PATH_DIRECTORY/$3 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo"";
+        else
+            echo $d `users` ": [ERROR] : Changing directory $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+            exit
+        fi
+        docker-compose down -v
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Stopping $3 containers" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Stopping $3 containers" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo sed -i "/$3/ d" /etc/hosts 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting domain name in /etc/hosts" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] :Deleting domain name in /etc/hosts" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -rf $HOME_PATH_DIRECTORY/$3 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting $3" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting $3" >> $DOCKER_LOG.log
+            exit
+        fi
+        crontab -u root -l | grep -v "$3"  | crontab -u root -
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting scheduled for $3" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting scheduled for $3" >> $DOCKER_LOG.log
+            exit
+        fi
+        echo " ------------------RESTART OF NGINX-PROXY------------------ "
+        docker restart  nginx-proxy
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Restarting NGINX-PROXY container" >> $DOCKER_LOG.log
+            exit
+        fi
+        exit
+        ;;
+        n|N)
+        echo $d `users` ": [ERROR] : Removing website $3 locally has been cancelled" >> $DOCKER_LOG.log
+        echo "Removing website $3 locally has been cancelled"
+        exit
+        ;;
+        *)
+        echo "Please enter (Y/n)"
+        exit
+        ;;
+    esac
+done
+fi
+echo " -------------END REMOVING CONTAINER--------------- "
+elif [[ " $2 " = *"-u"* ]] && [[ " $3 " = *"--all"* ]] && [[ -z "$4" ]];
+then
+echo " ---------UNINSTALING CONTAINER SYSTEM------------- "
+. /var/medv/medv_docker.conf
+read -p "Do you want to uninstall docker for your machine? (Y/n) " Y
+while :
+do
+    case $Y in Y|y)
+        sudo docker stop nginx-proxy
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Stopping NGINX-PROXY container" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Stopping NGINX-PROXY container" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo docker stop portainer
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Stopping PORTAINER container" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Stopping PORTAINER container" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo docker stop $(docker ps -a -q)
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Stopping all containers" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Stopping all containers" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo docker ps -a
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Listing containers" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Listing containers" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo apt-get purge -y docker-ce
+        sudo apt-get autoremove --purge -y docker-ce
+        sudo rm -rf /var/lib/docker 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting all the containes, images and volumes" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting all the containes, images and volumes" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -rf /etc/docker
+        sudo rm -rf /etc/systemd/system/docker.service
+        sudo rm -rf /etc/init/d/docker 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting all certificates and configurations medv docker system" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting all certificates and configurations medv docker system" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -rf /usr/local/bin/docker-compose 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting docker-compose" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting docker-compose" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo apt-get autoremove && apt-get autoclean
+        sudo sed -i -e '/#Start Docker Website/,/#End Docker Website/d' /etc/hosts 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting domains from : /etc/hosts" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting domains from : /etc/hosts" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -r /var/medv/yml/ 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting directory : /var/medv/yml" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting yml directory" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -r $HOME_PATH_DIRECTORY 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting directory : $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting directory : $HOME_PATH_DIRECTORY" >> $DOCKER_LOG.log
+            exit
+        fi
+        sudo rm -r /var/medv/medv_docker.conf 2>> $DOCKER_LOG.log
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting config file : /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting config file : /var/medv/medv_docker.conf" >> $DOCKER_LOG.log
+            exit
+        fi
+        crontab -u root -l | grep -v 'medv'  | crontab -u root -
+        if [ $? -eq 0 ];
+        then
+            echo $d `users` ": [SUCCESS] : Deleting scheduled for system medv" >> $DOCKER_LOG.log
+        else
+            echo $d `users` ": [ERROR] : Deleting scheduled for system medv" >> $DOCKER_LOG.log
+            exit
+        fi
+        exit
+        ;;
+        n|N)
+        echo "Unistallation medv docker system has been canceled"
+        echo $d  `users` ": [ERROR] : Unistallation medv docker system has been canceled" >> $DOCKER_LOG.log
+        exit
+        ;;
+        *)
+        echo "Please enter (Y/n)"
+        exit
+        ;;
+    esac
+done
+}
+uninstaller
+echo " -------END UNINSTALING CONTAINER SYSTEM----------- "
+
+else
+medv --help
+fi
+elif [[ " $1 " = *"--v"* ]] || [[ " $1 " = *"--version"* ]] && [[ -z "$2" ]];
+then
+echo " ------------------SHOWING VERSION----------------------- "
+echo "V0.1 Mai 2018"
+echo " ----------------END SHOWING VERSION--------------------- "
+else
+echo " "
+echo "medv 0.1 Mai 2018"
+echo "Mind Engineering Docker VPS"
+echo "by Mind.Engineering"
+echo "https://mind.engineering/"
+echo " "
+echo " "
+echo "Usage: medv option1 -arguments --subarguments"
+echo " "
+echo "    --v, --version                            show version"
+echo "    --h, --help                               show help"
+echo "    docker -i                                 install docker system with composer, portainer and nginx-proxy"
+echo "    docker -yml --list                        list of yml files"
+echo "    docker -yml --update                      update yml files"
+echo "    docker -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
+echo "    docker -b -s domainename.tld              create backup from specific domainename.tld with a crontab"
+echo "    docker -b -s --list domainename.tld       list a crontab file from specific domainename.tld"
+echo "    docker -b -s --add domainename.tld        add a crontab from specific domainename.tld"
+echo "    docker -b -s --delete domainename.tld     delete a crontab from specific domainename.tld"
+echo "    docker -r domainename.tld --list          list of backups loaded for specific domainename.tld"
+echo "    docker -r domainename.tld backupfile      restore website volumes for specific domaiename.tld from specific backupfile"
+echo "    docker -rm domainename.tld                remove dockers, volumes, backup and configuration for specific domainename.tld"
+echo "    docker -start domainename.tld             start specific domainename.tld"
+echo "    docker -stop domainename.tld              stop specific domainename.tld"
+echo "    docker -log --view                        read docker log file"
+echo "    docker -log --trancate                    trancate docker log file"
+echo "    docker -config --view                     read medv docker config file"
+echo "    docker -config --edit                     edit medv docker config file"
+echo "    docker -u --all                           remove all"
+fi
