@@ -22,10 +22,9 @@ function DOCKERME_HELP(){
 	echo "    dockerme -log --trancate                    trancate docker log file"
 	echo "    dockerme -config --view                     read medv docker config file"
 	echo "    dockerme -config --edit                     edit medv docker config file"
-	echo "    dockerme -u --all                           remove all"
+	echo "    dockerme -u --all                           remove all" 
 }
 function DOCKERME_HEADER(){
-	
 	cat << "EOF"
 
 	 ____                    __
@@ -41,7 +40,7 @@ function DOCKERME_HEADER(){
 	Docker Hosting Tools
 	by Mind.Engineering
 	https://mind.engineering/
-	
+
 EOF
 }
 function DOCKERME_GLOBAL_VARS(){
@@ -49,9 +48,8 @@ function DOCKERME_GLOBAL_VARS(){
 	DOCKERME_CONFIG="$DOCKERME_DIRECTORY/dockerme.conf"
 	DOCKERME_YML_DIRECTORY="$DOCKERME_DIRECTORY/yml"
 	DOCKERME_LOG="/var/log/dockerme"
-	DOCKERME_LOG_TMP="/var/log/dockerme_tmp"
 	d=`date +"%Y-%m-%d %T"`
-	D=`date "+%Y%m%d%H%M%S"`
+	D=`date "+%Y%m%d%H%M%S"`	
 }
 function DOCKERME_PROGRESS(){
 
@@ -189,7 +187,7 @@ function DOCKERME_PROGRESS(){
 	}
 	if [ -z $PROGRESS_DEFER ]; then
 	  progress_start
-	fi
+	fi 
 }
 function DOCKERME_INSTALL(){
 	PROGRESS_STICKY=yes
@@ -201,161 +199,161 @@ function DOCKERME_INSTALL(){
 		if [[ $i -eq 1 ]]; then
 			if  [[ $(which docker) && $(docker --version) ]]; then
 				echo " * DOCKER FOUND........................................................................................................[FAIL]"
-				echo $d `users` ": [FAIL] : DOCKER FOUND : CODE UNI1 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo $d `users` ": [FAIL] : DOCKER FOUND : CODE UNI1 " >> $DOCKERME_LOG.log
 				exit
 			else
 				echo " * DOCKERME SETUP......................................................................................................[INITIALIZING]"
 				echo $d `users` ": [INITIALIZING] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 2 ]]; then
-			apt-get update -y >> $DOCKER_LOG_TMP.log
+			apt-get update -y 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * SYSTEM UPDATE.......................................................................................................[OK]"
 				echo $d `users` ": [OK] : SYSTEM UPDATE" >> $DOCKERME_LOG.log
 			else
-				echo " * SYSTEM UPDATING.....................................................................................................[FAIL] CODE I2 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : SYSTEM UPDATING : CODE I2 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * SYSTEM UPDATING.....................................................................................................[FAIL] CODE I2 "
+				echo $d `users` ": [FAIL] : SYSTEM UPDATING : CODE I2 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 3 ]]; then
-			apt-get upgrade -y >> $DOCKER_LOG_TMP.log
+			apt-get upgrade -y 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * SYSTEM UPGRADE......................................................................................................[OK]"
 				echo $d `users` ": [OK] : SYSTEM UPGRADE" >> $DOCKERME_LOG.log
 			else
-				echo " * SYSTEM UPGRADING....................................................................................................[FAIL] CODE I3 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : SYSTEM UPGRADING : CODE I3 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * SYSTEM UPGRADING....................................................................................................[FAIL] CODE I3 "
+				echo $d `users` ": [FAIL] : SYSTEM UPGRADING : CODE I3 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 4 ]]; then
-			apt-get install git zip unzip >> $DOCKER_LOG_TMP.log
+			apt-get install git zip unzip 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * INSTALL git, zip & unzip............................................................................................[OK]"
 				echo $d `users` ": [OK] : INSTALL git, zip & unzip" >> $DOCKERME_LOG.log
 				#exit
 			else
-				echo " * INSTALLING git, zip & unzip.........................................................................................[FAIL] CODE I4 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : INSTALLING git, zip & unzip : CODE I4 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * INSTALLING git, zip & unzip.........................................................................................[FAIL] CODE I4 "
+				echo $d `users` ": [FAIL] : INSTALLING git, zip & unzip : CODE I4 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 5 ]]; then
-			apt-get install -y apt-transport-https ca-certificates curl software-properties-common >> $DOCKER_LOG_TMP.log
+			apt-get install -y apt-transport-https ca-certificates curl software-properties-common 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * INSTALL PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common..............................[OK]"
 				echo $d `users` ": [OK] : INSTALL PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common" >> $DOCKERME_LOG.log
 			else
-				echo " * INSTALLING PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common...........................[FAIL] CODE I5, PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : INSTALLING PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common : CODE I5 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * INSTALLING PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common...........................[FAIL] CODE I5 "
+				echo $d `users` ": [FAIL] : INSTALLING PACKAGE apt-transport-https, ca-certificates, curl, software-properties-common : CODE I5 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 6 ]]; then
-			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -  >> $DOCKER_LOG_TMP.log
+			curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOWNLOAD DOCKER GNU PRIVACY GUARD (GPG).............................................................................[OK]"
 				echo $d `users` ": [OK] : DOWNLOAD DOCKER GNU PRIVACY GUARD (GPG)" >> $DOCKERME_LOG.log
 			else
-				echo " * DOWNLOADING DOCKER GNU PRIVACY GUARD (GPG)..........................................................................[FAIL] CODE I6, PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
+				echo " * DOWNLOADING DOCKER GNU PRIVACY GUARD (GPG)..........................................................................[FAIL] CODE I6 "
 				echo $d `users` ": [FAIL] : DOWNLOADING DOCKER GNU PRIVACY GUARD (GPG)" >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 7 ]]; then
-			add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"  >> $DOCKER_LOG_TMP.log
+			add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * ADD DOCKER REPOSITORY...............................................................................................[OK]"
 				echo $d `users` ": [OK] : ADD DOCKER REPOSITORY" >> $DOCKERME_LOG.log
 			else
-				echo " * ADDING DOCKER REPOSITORY............................................................................................[FAIL] CODE I7, PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : ADDING DOCKER REPOSITORY : CODE I7 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * ADDING DOCKER REPOSITORY............................................................................................[FAIL] CODE I7 "
+				echo $d `users` ": [FAIL] : ADDING DOCKER REPOSITORY : CODE I7 " >> $DOCKERME_LOG.log
 				#exit
 			fi		
 		elif [[ $i -eq 8 ]]; then
-			apt-get update -y >> $DOCKER_LOG_TMP.log
+			apt-get update -y 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * SYSTEM UPDATE.......................................................................................................[OK]"
 				echo $d `users` ": [OK] : SYSTEM UPDATE" >> $DOCKERME_LOG.log
 			else
-				echo " * SYSTEM UPDATING.....................................................................................................[FAIL] CODE I8 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : SYSTEM UPDATING : CODE I8 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * SYSTEM UPDATING.....................................................................................................[FAIL] CODE I8 "
+				echo $d `users` ": [FAIL] : SYSTEM UPDATING : CODE I8 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 9 ]]; then
-			apt-get install -y docker-ce -y >> $DOCKER_LOG_TMP.log
+			apt-get install -y docker-ce -y 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * INSTALL DOCKER-CE...................................................................................................[OK]"
 				echo $d `users` ": [OK] : INSTALL DOCKER-CE" >> $DOCKERME_LOG.log
 			else
-				echo " * INSTALLING DOCKER-CE................................................................................................[FAIL] CODE I9 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : INSTALLING DOCKER-CE : CODE I9 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * INSTALLING DOCKER-CE................................................................................................[FAIL] CODE I9 "
+				echo $d `users` ": [FAIL] : INSTALLING DOCKER-CE : CODE I9 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 10 ]]; then
 			#apt-cache madison docker-ce
-			#usermod -aG docker ${USER} >> DOCKER_LOG_TMP.log
-			curl -L https://github.com/docker/compose/releases/download/1.21.0-rc1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose >> $DOCKER_LOG_TMP.log
+			#usermod -aG docker ${USER}
+			curl -L https://github.com/docker/compose/releases/download/1.21.0-rc1/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOWNLOAD DOCKER-COMPOSE.............................................................................................[OK]"
 				echo $d `users` ": [OK] : DOWNLOAD DOCKER-COMPOSE" >> $DOCKERME_LOG.log
 			else
-				echo " * DOWNLOAD DOCKER-COMPOSE.............................................................................................[FAIL] CODE INS10 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOWNLOAD DOCKER-COMPOSE : CODE INS10 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DOWNLOAD DOCKER-COMPOSE.............................................................................................[FAIL] CODE INS10 "
+				echo $d `users` ": [FAIL] : DOWNLOAD DOCKER-COMPOSE : CODE INS10 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 11 ]]; then
-			chmod +x /usr/local/bin/docker-compose >> $DOCKER_LOG_TMP.log
+			chmod +x /usr/local/bin/docker-compose 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * ADD EXECUTE PERMESSION TO DOCKER-COMPOSE............................................................................[OK]"
 				echo $d `users` ": [OK] : ADD EXECUTE PERMESSION TO DOCKER-COMPOSE" >> $DOCKERME_LOG.log
 			else
-				echo " * ADDING EXECUTE PERMESSION TO DOCKER-COMPOSE.........................................................................[FAIL] CODE INS11: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : ADDING EXECUTE PERMESSION TO DOCKER-COMPOSE : CODE INS11 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * ADDING EXECUTE PERMESSION TO DOCKER-COMPOSE.........................................................................[FAIL] CODE INS11"
+				echo $d `users` ": [FAIL] : ADDING EXECUTE PERMESSION TO DOCKER-COMPOSE : CODE INS11 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 12 ]]; then
-			if [[ ! -d /var/dockerme ]]; then
-				mkdir /var/dockerme >> $DOCKER_LOG_TMP.log
+			if [[ ! -d $DOCKERME_DIRECTORY ]]; then
+				mkdir $DOCKERME_DIRECTORY 1>/dev/null 2>&1;
 				if [[ $? -eq 0 ]]; then
-					echo " * CREATE MEDV DIRECTORY UNDER /var/dockerme...........................................................................[OK]"
-				echo $d `users` ": [OK] : CREATE MEDV DIRECTORY UNDER /var/dockerme" >> $DOCKERME_LOG.log
+					echo " * CREATE MEDV DIRECTORY UNDER $DOCKERME_DIRECTORY...........................................................................[OK]"
+				echo $d `users` ": [OK] : CREATE MEDV DIRECTORY UNDER $DOCKERME_DIRECTORY" >> $DOCKERME_LOG.log
 				else
-					echo " * CREATING MEDV DIRECTORY UNDER /var/dockerme.............................................................................[FAIL] CODE INS12: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : CREATING MEDV DIRECTORY UNDER /var/dockerme : CODE INS12 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+					echo " * CREATING MEDV DIRECTORY UNDER $DOCKERME_DIRECTORY.............................................................................[FAIL] CODE INS12"
+				echo $d `users` ": [FAIL] : CREATING MEDV DIRECTORY UNDER $DOCKERME_DIRECTORY : CODE INS12 " >> $DOCKERME_LOG.log
 	                #exit
 	            fi
 	        else
-	        	echo " * TRYING TO CREATE /var/dockerme, BUT DIRECTORY ALRADY EXIST!.........................................................[WARNING]"
-	        	echo $d `users` ": [WARNING] : TRYING TO CREATE /var/dockerme, BUT DIRECTORY ALRADY EXIST!" >> $DOCKERME_LOG.log
+	        	echo " * TRYING TO CREATE $DOCKERME_DIRECTORY, BUT DIRECTORY ALRADY EXIST!.........................................................[WARNING]"
+	        	echo $d `users` ": [WARNING] : TRYING TO CREATE $DOCKERME_DIRECTORY, BUT DIRECTORY ALRADY EXIST!" >> $DOCKERME_LOG.log
 	        fi
 	    elif [[ $i -eq 13 ]]; then
-	    	cd /var/dockerme >> $DOCKER_LOG_TMP.log
-	    	rm -r yml >> $DOCKER_LOG_TMP.log
-	    	git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml >> $DOCKER_LOG_TMP.log
+	    	cd $DOCKERME_DIRECTORY 1>/dev/null 2>&1;
+	    	rm -r yml 1>/dev/null 2>&1;
+	    	git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml 1>/dev/null 2>&1;
 	    	if [ $? -eq 0 ]; then
 	    		echo " * CLONE YML REPOSITORY FROM GIT SERVER................................................................................[OK]"
 				echo $d `users` ": [OK] : CLONE YML REPOSITORY FROM GIT SERVER" >> $DOCKERME_LOG.log
 	    	else
-	    		echo " * CLONING YML REPOSITORY FROM GIT SERVER..............................................................................[FAIL] CODE INS13: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : CLONING YML REPOSITORY FROM GIT SERVER : CODE INS13 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+	    		echo " * CLONING YML REPOSITORY FROM GIT SERVER..............................................................................[FAIL] CODE INS13"
+				echo $d `users` ": [FAIL] : CLONING YML REPOSITORY FROM GIT SERVER : CODE INS13 " >> $DOCKERME_LOG.log
 	    		#exit
 	    	fi
 	    elif [[ $i -eq 14 ]]; then
-			touch dockerme.conf  >> $DOCKER_LOG_TMP.log
+			touch dockerme.conf  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * CREATE CONFIGURATION FILE UNDER $DOCKERME_CONFIG.........................................................[OK]"
 				echo $d `users` ": [OK] : CREATE CONFIGURATION FILE UNDER" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG.......................................................[FAIL] CODE INS14: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG : CODE INS14 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG.......................................................[FAIL] CODE INS14"
+				echo $d `users` ": [FAIL] : CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG : CODE INS14 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 15 ]]; then
-			mkdir -p /home/dockerme_docker >> $DOCKER_LOG_TMP.log
+			mkdir -p /home/dockerme_docker 1>/dev/null 2>&1;
 			echo "HOME_PATH_DIRECTORY=/home/dockerme-docker" >> dockerme.conf
 			if [[ $? -eq 0 ]]; then
 				echo " * SETUP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker..........................................................[OK]"
 				echo $d `users` ": [OK] : SETUP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker" >> $DOCKERME_LOG.log
 			else
-				echo " * SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker..........................................................[FAIL] CODE INS15: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker : CODE INS15 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker..........................................................[FAIL] CODE INS15"
+				echo $d `users` ": [FAIL] : SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker : CODE INS15 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 16 ]]; then
@@ -364,8 +362,8 @@ function DOCKERME_INSTALL(){
 				echo " * CREATE NGINX-PROXY CONTAINER........................................................................................[OK]"
 				echo $d `users` ": [OK] : CREATE NGINX-PROXY CONTAINER" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATING NGINX-PROXY CONTAINER......................................................................................[FAIL] CODE INS16: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : CREATING NGINX-PROXY CONTAINER : CODE INS16 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * CREATING NGINX-PROXY CONTAINER......................................................................................[FAIL] CODE INS16"
+				echo $d `users` ": [FAIL] : CREATING NGINX-PROXY CONTAINER : CODE INS16 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 17 ]]; then
@@ -374,17 +372,16 @@ function DOCKERME_INSTALL(){
 				echo " * CREATE PORTAINER CONTAINER..........................................................................................[OK]"
 				echo $d `users` ": [OK] : CREATE PORTAINER CONTAINER" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATING PORTAINER CONTAINER........................................................................................[FAIL] CODE INS17: PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : CREATING PORTAINER CONTAINER : CODE INS17 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * CREATING PORTAINER CONTAINER........................................................................................[FAIL] CODE INS17"
+				echo $d `users` ": [FAIL] : CREATING PORTAINER CONTAINER : CODE INS17 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 18 ]]; then
-			sudo rm $DOCKERME_LOG_TMP.log > /dev/null 2>&1
 			echo " * DOCKERME SETUP......................................................................................................[COMPLETED]"
 			echo $d `users` ": [OK] : DOCKERME SETUP" >> $DOCKERME_LOG.log
 		fi
 	  progress_step
-	done
+	done 
 }
 function DOCKERME_UNINSTALL(){
 	PROGRESS_STICKY=yes
@@ -397,56 +394,56 @@ function DOCKERME_UNINSTALL(){
 			sudo rm $DOCKERME_LOG_TMP.log > /dev/null 2>&1
 			if ! [[ $(which docker) && $(docker --version) ]]; then
 				echo " * DOCKER NOT FOUND...........................................................................................[FAIL]"
-				echo $d `users` ": [FAIL] : DOCKER NOT FOUND : CODE UNI1 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo $d `users` ": [FAIL] : DOCKER NOT FOUND : CODE UNI1 " >> $DOCKERME_LOG.log
 				exit
 			else
 				echo " * DOCKERME SETUP....................................................................................................[INITIALIZING]"
 				echo $d `users` ": [INITIALIZING] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 2 ]]; then
-			sudo docker kill $(docker ps -q)  >> $DOCKER_LOG_TMP.log
+			sudo docker kill $(docker ps -q)  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOCKER KILL ALL CONTAINER.........................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER KILL ALL CONTAINER" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 3 ]]; then
-			sudo docker rm $(docker ps -a -q)  >> $DOCKER_LOG_TMP.log
+			sudo docker rm $(docker ps -a -q)  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOCKER REMOVE ALL CONTAINER.......................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER REMOVING ALL CONTAINER.....................................................................................[FAIL] CODE UNI3 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER : CODE UNI3 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DOCKER REMOVING ALL CONTAINER.....................................................................................[FAIL] CODE UNI3 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER : CODE UNI3 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 4 ]]; then
-			sudo docker rmi $(docker images -q) >> $DOCKER_LOG_TMP.log
+			sudo docker rmi $(docker images -q) 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOCKER REMOVE ALL CONTAINER IMAGES................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER IMAGES" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER REMOVING ALL CONTAINER IMAGES..............................................................................[FAIL] CODE UNI4 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER IMAGES: CODE UNI4 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DOCKER REMOVING ALL CONTAINER IMAGES..............................................................................[FAIL] CODE UNI4 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER IMAGES: CODE UNI4 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 5 ]]; then
-			sudo apt-get purge -y docker-ce >> $DOCKER_LOG_TMP.log
+			sudo apt-get purge -y docker-ce 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DOCKER PURGE......................................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER PURGE" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER PURGING....................................................................................................[FAIL] CODE UNI5 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER PURGING : CODE UNI5 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DOCKER PURGING....................................................................................................[FAIL] CODE UNI5 "
+				echo $d `users` ": [FAIL] : DOCKER PURGING : CODE UNI5 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 6 ]]; then
-			sudo rm -rf /var/lib/docker /etc/docker /etc/systemd/system/docker.service /etc/init/d/docker /usr/local/bin/docker-compose /var/dockerme $HOME_PATH_DIRECTORY >> $DOCKER_LOG_TMP.log
+			sudo rm -rf /var/lib/docker /etc/docker /etc/systemd/system/docker.service /etc/init/d/docker /usr/local/bin/docker-compose $DOCKERME_DIRECTORY $HOME_PATH_DIRECTORY 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER REMOVE EXTRA CONFIG FILE...................................................................................[OK]"
+				echo " * REMOVE EXTRA CONFIG FILE..........................................................................................[OK]"
 				echo $d `users` ": [OK] : OCKER REMOVE EXTRA CONFIG FILE" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER REMOVING EXTRA CONFIG FILE.................................................................................[FAIL] CODE UNI6 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER REMOVING EXTRA CONFIG FILE : CODE UNI6 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * REMOVING EXTRA CONFIG FILE........................................................................................[FAIL] CODE UNI6 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING EXTRA CONFIG FILE : CODE UNI6 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 7 ]]; then
@@ -455,103 +452,127 @@ function DOCKERME_UNINSTALL(){
 				echo " * DOCKER REMOVE.....................................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER REMOVE" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER REMOVING...................................................................................................[FAIL] CODE UNI7 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER REMOVING : CODE UNI7 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DOCKER REMOVING...................................................................................................[FAIL] CODE UNI7 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING : CODE UNI7 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 8 ]]; then
-			sudo apt-get autoremove && apt-get autoclean >> $DOCKER_LOG_TMP.log
+			sudo apt-get autoclean 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER AUTOREMOVE AUTOCLEAN.......................................................................................[OK]"
+				echo " * AUTOREMOVE AUTOCLEAN..............................................................................................[OK]"
 				echo $d `users` ": [OK] : DOCKER AUTOREMOVE AUTOCLEAN" >> $DOCKERME_LOG.log
 			else
-				echo " * DOCKER AUTOREMOVING AUTOCLEANING..................................................................................[FAIL] CODE UNI8 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DOCKER AUTOREMOVING AUTOCLEANING : CODE UNI8 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * AUTOREMOVING AUTOCLEANING.........................................................................................[FAIL] CODE UNI8 "
+				echo $d `users` ": [FAIL] : DOCKER AUTOREMOVING AUTOCLEANING : CODE UNI8 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 9 ]]; then
-			crontab -u root -l | grep -v 'medv'  | crontab -u root -
+			crontab -u root -l | grep -v 'medv'  | crontab -u root - 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DELEATE SCHEDULED BACKUP FROM CRONTAB.............................................................................[OK]"
 				echo $d `users` ": [OK] : DELEATE SCHEDULED BACKUP FROM CRONTAB" >> $DOCKERME_LOG.log
 			else
-				echo " * DELEATING SCHEDULED BACKUP FROM CRONTAB...........................................................................[FAIL] CODE UNI9 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log"
-				echo $d `users` ": [FAIL] : DELEATING SCHEDULED BACKUP FROM CRONTAB : CODE UNI9 : PLEASE CHECK tmp logfile $DOCKERME_LOG_TMP.log" >> $DOCKERME_LOG.log
+				echo " * DELEATING SCHEDULED BACKUP FROM CRONTAB...........................................................................[FAIL] CODE UNI9 "
+				echo $d `users` ": [FAIL] : DELEATING SCHEDULED BACKUP FROM CRONTAB : CODE UNI9 " >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 10 ]]; then
-			#sudo rm $DOCKERME_LOG_TMP.log > /dev/null 2>&1
 			echo " * DOCKERME UNINSTALL.............................................................................................[COMPLETED]"
 			echo $d `users` ": [OK] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
 		fi
 	  progress_step
-	done
+	done 
 }
-function DOCKERME_IF_DOCKER_INSTALLED(){
+function DOCKERME_IF_DOCKERME_INSTALLED(){
 	if ! [[ $(which docker) && $(docker --version) ]]; then
 		echo " * DOCKER NOT FOUND...........................................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOCKER NOT FOUND" >> $DOCKERME_LOG.log
 		exit
 	fi	
-}
-function DOCKERME_IF_DOCKERME_REPO_EXIST(){
-	if [[ ! -d /var/dockerme ]]; then
-		echo " * DOCKERME REPOSITORY /var/dockerme NOT FOUND................................................................[FAIL]"
-		echo $d `users` ": [FAIL] : DOCKERME REPOSITORY /var/dockerme NOT FOUND" >> $DOCKERME_LOG.log
+	if [[ ! -d $DOCKERME_DIRECTORY ]]; then
+		echo " * DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
 		exit
-    fi	
-}
-function DOCKERME_IF_YML_REPO_EXIST(){
-	if [[ ! -d /var/dockerme/yml ]]; then
-		echo " * DOCKERME YML REPOSITORY /var/dockerme/yml NOT FOUND........................................................[FAIL]"
-		echo $d `users` ": [FAIL] : DOCKERME YML REPOSITORY /var/dockerme/yml NOT FOUND" >> $DOCKERME_LOG.log
+    fi
+    if [[ ! -d $DOCKERME_YML_DIRECTORY ]]; then
+		echo " * DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND........................................................[FAIL]"
+		echo $d `users` ": [FAIL] : DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
 		exit
-    fi	
-}
-function DOCKERME_IF_CONFIG_FILE_EXIST(){
+    fi
     if [ ! -f $DOCKERME_CONFIG ]; then
 		echo " * DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND..................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND" >> $DOCKERME_LOG.log
 		exit
     fi
-}
-function DOCKERME_IF_HOME_PATH_DIRECTORY_EXIST(){
-	. /$DOCKERME_CONFIG
+    . /$DOCKERME_CONFIG
     if [ -z $HOME_PATH_DIRECTORY ]; then
     	echo " * HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY............[FAIL]"
 		echo $d `users` ": [FAIL] : HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY" >> $DOCKERME_LOG.log
 		exit
-    fi
-}
-function DOCKERME_IF_DOCKERME_INSTALLED(){
-	DOCKERME_IF_DOCKER_INSTALLED
-	DOCKERME_IF_DOCKERME_REPO_EXIST
-    DOCKERME_IF_YML_REPO_EXIST
-    DOCKERME_IF_CONFIG_FILE_EXIST
-    DOCKERME_IF_HOME_PATH_DIRECTORY_EXIST
+    fi 
 }
 function DOCKERME_YML_LIST(){
-	DOCKERME_IF_DOCKER_INSTALLED
-	if [ ! -d /var/dockerme/yml ]; then
-		echo $d `users` ": [ERROR] : YML directory not found " >> $DOCKER_LOG.log
-		echo "/var/dockerme/yml : directory not found!"
+	DOCKERME_IF_DOCKERME_INSTALLED
+	ls -1 $DOCKERME_YML_DIRECTORY 1>/dev/null 2>&1;
+	if [ $? -eq 0 ]; then
+		echo " * DOCKERME YML LIST..........................................................................................[INITIALIZING]"
+		echo ""
+		ls -1 $DOCKERME_YML_DIRECTORY
+		echo ""
+		echo " * DOCKERME YML LIST..........................................................................................[COMPLETED]"	
+		echo $d `users` ": [OK] : DOCKERME YML LIST" >> $DOCKERME_LOG.log
 	else
-		ls -1 /var/dockerme/yml 2>> $DOCKER_LOG.log
-		if [ $? -eq 0 ]; then
-			echo $d `users` ": [SUCCESS] : Listing YML directory" >> $DOCKER_LOG.log
-		else
-			echo $d `users` ": [ERROR] : Listing YML directory" >> $DOCKER_LOG.log
-			exit
-		fi
+		echo " * DOCKERME YML LIST..........................................................................................[INITIALIZING]"
+		echo " * DOCKERME YML LIST..........................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : DOCKERME YML LIST : CODE YUL01" >> $DOCKERME_LOG.log
+		exit
 	fi
 }
 function DOCKERME_YML_UPDATE(){
+	PROGRESS_STICKY=yes
+	PROGRESS_WIDTH=100
+	progress_max_lines=1
+	PROGRESS_NUMBER_OF_STEPS=${1:-2}
+	DOCKERME_PROGRESS
 	DOCKERME_IF_DOCKERME_INSTALLED
-	sudo rm -r $DOCKERME_YML_DIRECTORY
-	cd $DOCKERME_DIRECTORY
-	git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml
+	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
+		if [[ $i -eq 1 ]]; then
+			sudo rm -r $DOCKERME_YML_DIRECTORY 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * REMOVE ACTUAL YML DIRECTORY $DOCKERME_YML_DIRECTORY.....................................................................[OK]"
+				echo $d `users` ": [OK] : REMOVE ACTUAL YML DIRECTORY $DOCKERME_YML_DIRECTORY" >> $DOCKERME_LOG.log
+			else
+				echo " * REMOVING ACTUAL YML DIRECTORY $DOCKERME_YML_DIRECTORY...................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : SYSTEM UPDATING : CODE YUP01 " >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 2 ]]; then
+			cd $DOCKERME_DIRECTORY 1>/dev/null 2>&1;
+			git clone http://cd4862abd5.mind.engineering/ayoubsakly/yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * CLONE NEW YML REPOSITORY FORM GIT SERVER..........................................................................[OK]"
+				echo $d `users` ": [OK] : CLONE NEW YML REPOSITORY FORM GIT SERVER" >> $DOCKERME_LOG.log
+			else
+				echo " * CLONEING NEW YML REPOSITORY FROM GIT SERVER.......................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : CLONEING NEW YML REPOSITORY FROM GIT SERVER : CODE YUP02clear " >> $DOCKERME_LOG.log
+				exit
+			fi
+		fi
+		progress_step
+	done
 }
+function DOCKERME_IF_WEBSITE_DIRECTORY_EXIST(){
+	
+	. $DOCKERME_CONFIG
+	# echo $HOME_PATH_DIRECTORY
+	if [[ -d /home/dockerme-docker/ayoub.com ]]; then
+		echo " * DOMAINE NAME ALRADY HOSTED BY DOCKERME...........................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : DOMAINE NAME $DOMAINE_NAME ALRADY HOSTED BY DOCKERME " >> $DOCKERME_LOG.log
+		exit
+    fi
+}
+
 
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
-DOCKERME_UNINSTALL
+DOCKERME_IF_WEBSITE_DIRECTORY_EXIST
