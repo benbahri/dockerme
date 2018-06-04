@@ -24,6 +24,9 @@ DOCKERME_HELP(){
 	echo "    dockerme -config --edit                     edit medv docker config file"
 	echo "    dockerme -u --all                           remove all" 
 }
+DOCKERME_VERSION(){
+	echo "DockerME V1.0 Mai 2018"
+}
 DOCKERME_HEADER(){
 	cat << "EOF"
 
@@ -36,7 +39,7 @@ DOCKERME_HEADER(){
 	    \/___/  \/___/  \/____/ \/_/\/_/\/____/ \/_/   \/_/ \/_/\/____/
 
 	
-	DockerME Mai 2018
+	DockerME V1.0 Mai 2018
 	Docker Hosting Tools
 	by Mind.Engineering
 	https://mind.engineering/
@@ -586,14 +589,12 @@ DOCKERME_IF_YML_EXIST(){
 		exit
 	fi
 }
-DOCKERME_IF_NGINX-PROXY_EXIST(){
-	#
-}
-DOCKERME_CREATE_CONTAINER(){
-	#DOMAINE_NAME
-	#YML
-}
-
-
+DOCKERME_IF_NGINX-PROXY_EXIST(){ 
+  # 
+} 
+DOCKERME_CREATE_CONTAINER(){ 
+  #DOMAINE_NAME 
+  #YML 
+} 
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
