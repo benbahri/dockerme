@@ -1,5 +1,5 @@
 #!/bin/bash
-function DOCKERME_HELP(){
+DOCKERME_HELP(){
 	echo " "
 	echo "Usage: medv option1 -arguments --subarguments"
 	echo " "
@@ -24,7 +24,7 @@ function DOCKERME_HELP(){
 	echo "    dockerme -config --edit                     edit medv docker config file"
 	echo "    dockerme -u --all                           remove all" 
 }
-function DOCKERME_HEADER(){
+DOCKERME_HEADER(){
 	cat << "EOF"
 
 	 ____                    __
@@ -43,15 +43,16 @@ function DOCKERME_HEADER(){
 
 EOF
 }
-function DOCKERME_GLOBAL_VARS(){
+DOCKERME_GLOBAL_VARS(){
 	DOCKERME_DIRECTORY="/var/dockerme"
+	DOCKERME_HOME_INSTALL="/home/dockerme_home"
 	DOCKERME_CONFIG="$DOCKERME_DIRECTORY/dockerme.conf"
 	DOCKERME_YML_DIRECTORY="$DOCKERME_DIRECTORY/yml"
 	DOCKERME_LOG="/var/log/dockerme"
 	d=`date +"%Y-%m-%d %T"`
 	D=`date "+%Y%m%d%H%M%S"`	
 }
-function DOCKERME_PROGRESS(){
+DOCKERME_PROGRESS(){
 
 	function ceiling_divide {
 	  ((result=($1 + ($2 - 1))/$2))
@@ -189,7 +190,116 @@ function DOCKERME_PROGRESS(){
 	  progress_start
 	fi 
 }
-function DOCKERME_INSTALL(){
+DOCKERME_UNINSTALL(){
+	PROGRESS_STICKY=yes
+	PROGRESS_WIDTH=100
+	progress_max_lines=1
+	PROGRESS_NUMBER_OF_STEPS=${1:-11}
+	DOCKERME_PROGRESS
+	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
+		if [[ $i -eq 1 ]]; then
+			if ! [[ $(which docker) && $(docker --version) ]]; then
+				echo " * DOCKER NOT FOUND....................................................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : DOCKER NOT FOUND : CODE UNI1 " >> $DOCKERME_LOG.log
+				#exit
+			else
+				echo " * DOCKERME SETUP......................................................................................................[INITIALIZING]"
+				echo $d `users` ": [INITIALIZING] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 2 ]]; then
+			sudo docker kill $(docker ps -q)  1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DOCKER KILL ALL CONTAINER...........................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER KILL ALL CONTAINER" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 3 ]]; then
+			sudo docker rm $(docker ps -a -q)  1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DOCKER REMOVE ALL CONTAINER.........................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER" >> $DOCKERME_LOG.log
+			else
+				echo " * DOCKER REMOVING ALL CONTAINER.......................................................................................[FAIL] CODE UNI3 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER : CODE UNI3 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 4 ]]; then
+			sudo docker rmi $(docker images -q) 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DOCKER REMOVE ALL CONTAINER IMAGES..................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER IMAGES" >> $DOCKERME_LOG.log
+			else
+				echo " * DOCKER REMOVING ALL CONTAINER IMAGES................................................................................[FAIL] CODE UNI4 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER IMAGES: CODE UNI4 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 5 ]]; then
+			sudo apt-get purge -y docker-ce 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DOCKER PURGE........................................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER PURGE" >> $DOCKERME_LOG.log
+			else
+				echo " * DOCKER PURGING......................................................................................................[FAIL] CODE UNI5 "
+				echo $d `users` ": [FAIL] : DOCKER PURGING : CODE UNI5 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 6 ]]; then
+			sudo rm -rf /var/lib/docker /etc/docker /etc/systemd/system/docker.service /etc/init/d/docker /usr/local/bin/docker-compose $DOCKERME_DIRECTORY $HOME_PATH_DIRECTORY 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * REMOVE EXTRA CONFIG FILE............................................................................................[OK]"
+				echo $d `users` ": [OK] : OCKER REMOVE EXTRA CONFIG FILE" >> $DOCKERME_LOG.log
+			else
+				echo " * REMOVING EXTRA CONFIG FILE..........................................................................................[FAIL] CODE UNI6 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING EXTRA CONFIG FILE : CODE UNI6 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 7 ]]; then
+			sudo apt-get autoremove --purge -y docker-ce 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DOCKER REMOVE.......................................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER REMOVE" >> $DOCKERME_LOG.log
+			else
+				echo " * DOCKER REMOVING.....................................................................................................[FAIL] CODE UNI7 "
+				echo $d `users` ": [FAIL] : DOCKER REMOVING : CODE UNI7 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 8 ]]; then
+			sudo apt-get autoclean 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * AUTOREMOVE AUTOCLEAN................................................................................................[OK]"
+				echo $d `users` ": [OK] : DOCKER AUTOREMOVE AUTOCLEAN" >> $DOCKERME_LOG.log
+			else
+				echo " * AUTOREMOVING AUTOCLEANING...........................................................................................[FAIL] CODE UNI8 "
+				echo $d `users` ": [FAIL] : DOCKER AUTOREMOVING AUTOCLEANING : CODE UNI8 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 9 ]]; then
+			crontab -u root -l | grep -v 'medv'  | crontab -u root - 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DELEATE SCHEDULED BACKUP FROM CRONTAB...............................................................................[OK]"
+				echo $d `users` ": [OK] : DELEATE SCHEDULED BACKUP FROM CRONTAB" >> $DOCKERME_LOG.log
+			else
+				echo " * DELEATING SCHEDULED BACKUP FROM CRONTAB.............................................................................[FAIL] CODE UNI9 "
+				echo $d `users` ": [FAIL] : DELEATING SCHEDULED BACKUP FROM CRONTAB : CODE UNI9 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 10 ]]; then
+			sudo rm -r  $DOCKERME_HOME_INSTALL 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * DELEATE DOCKERME_HOME_INSTALL $DOCKERME_HOME_INSTALL...................................................................[OK]"
+				echo $d `users` ": [OK] : DELEATE DOCKERME_HOME_INSTALL $DOCKERME_HOME_INSTALL" >> $DOCKERME_LOG.log
+			else
+				echo " * DELEATING DOCKERME_HOME_INSTALL $DOCKERME_HOME_INSTALL.................................................................[FAIL] CODE UNI9 "
+				echo $d `users` ": [FAIL] : DELEATING DOCKERME_HOME_INSTALL $DOCKERME_HOME_INSTALL : CODE UNI10 " >> $DOCKERME_LOG.log
+				#exit
+			fi
+		elif [[ $i -eq 11 ]]; then
+			echo " * DOCKERME UNINSTALL..................................................................................................[COMPLETED]"
+			echo $d `users` ": [OK] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
+		fi
+	  progress_step
+	done 
+}
+DOCKERME_INSTALL(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
 	progress_max_lines=1
@@ -336,24 +446,24 @@ function DOCKERME_INSTALL(){
 	    		#exit
 	    	fi
 	    elif [[ $i -eq 14 ]]; then
-			touch dockerme.conf  1>/dev/null 2>&1;
+			touch $DOCKERME_CONFIG  1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * CREATE CONFIGURATION FILE UNDER $DOCKERME_CONFIG.........................................................[OK]"
-				echo $d `users` ": [OK] : CREATE CONFIGURATION FILE UNDER" >> $DOCKERME_LOG.log
+				echo " * CREATE CONFIGURATION FILE UNDER $DOCKERME_DIRECTORY.......................................................................[OK]"
+				echo $d `users` ": [OK] : CREATE CONFIGURATION FILE UNDER $DOCKERME_DIRECTORY" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG.......................................................[FAIL] CODE INS14"
-				echo $d `users` ": [FAIL] : CREATING CONFIGURATION FILE UNDER DOCKERME_CONFIG : CODE INS14 " >> $DOCKERME_LOG.log
+				echo " * CREATING CONFIGURATION FILE UNDER $DOCKERME_DIRECTORY.......................................................[FAIL] CODE INS14"
+				echo $d `users` ": [FAIL] : CREATING CONFIGURATION FILE UNDER $DOCKERME_DIRECTORY : CODE INS14 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 15 ]]; then
-			mkdir -p /home/dockerme_docker 1>/dev/null 2>&1;
-			echo "HOME_PATH_DIRECTORY=/home/dockerme-docker" >> dockerme.conf
+			mkdir -p $DOCKERME_HOME_INSTALL 1>/dev/null 2>&1;
+			echo "HOME_PATH_DIRECTORY=$DOCKERME_HOME_INSTALL" >> dockerme.conf
 			if [[ $? -eq 0 ]]; then
-				echo " * SETUP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker..........................................................[OK]"
-				echo $d `users` ": [OK] : SETUP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker" >> $DOCKERME_LOG.log
+				echo " * SETUP HOME HOME_PATH_DIRECTORY UNDER $DOCKERME_HOME_INSTALL............................................................[OK]"
+				echo $d `users` ": [OK] : SETUP HOME HOME_PATH_DIRECTORY UNDER $DOCKERME_HOME_INSTALL" >> $DOCKERME_LOG.log
 			else
-				echo " * SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker..........................................................[FAIL] CODE INS15"
-				echo $d `users` ": [FAIL] : SETING UP HOME HOME_PATH_DIRECTORY UNDER /home/dockerme_docker : CODE INS15 " >> $DOCKERME_LOG.log
+				echo " * SETING UP HOME HOME_PATH_DIRECTORY UNDER $DOCKERME_HOME_INSTALL............................................................[FAIL] CODE INS15"
+				echo $d `users` ": [FAIL] : SETING UP HOME HOME_PATH_DIRECTORY UNDER $DOCKERME_HOME_INSTALL : CODE INS15 " >> $DOCKERME_LOG.log
 				#exit
 			fi
 		elif [[ $i -eq 16 ]]; then
@@ -383,107 +493,7 @@ function DOCKERME_INSTALL(){
 	  progress_step
 	done 
 }
-function DOCKERME_UNINSTALL(){
-	PROGRESS_STICKY=yes
-	PROGRESS_WIDTH=100
-	progress_max_lines=1
-	PROGRESS_NUMBER_OF_STEPS=${1:-8}
-	DOCKERME_PROGRESS
-	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
-		if [[ $i -eq 1 ]]; then
-			sudo rm $DOCKERME_LOG_TMP.log > /dev/null 2>&1
-			if ! [[ $(which docker) && $(docker --version) ]]; then
-				echo " * DOCKER NOT FOUND...........................................................................................[FAIL]"
-				echo $d `users` ": [FAIL] : DOCKER NOT FOUND : CODE UNI1 " >> $DOCKERME_LOG.log
-				exit
-			else
-				echo " * DOCKERME SETUP....................................................................................................[INITIALIZING]"
-				echo $d `users` ": [INITIALIZING] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
-			fi
-		elif [[ $i -eq 2 ]]; then
-			sudo docker kill $(docker ps -q)  1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER KILL ALL CONTAINER.........................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER KILL ALL CONTAINER" >> $DOCKERME_LOG.log
-			fi
-		elif [[ $i -eq 3 ]]; then
-			sudo docker rm $(docker ps -a -q)  1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER REMOVE ALL CONTAINER.......................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER" >> $DOCKERME_LOG.log
-			else
-				echo " * DOCKER REMOVING ALL CONTAINER.....................................................................................[FAIL] CODE UNI3 "
-				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER : CODE UNI3 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 4 ]]; then
-			sudo docker rmi $(docker images -q) 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER REMOVE ALL CONTAINER IMAGES................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER REMOVE ALL CONTAINER IMAGES" >> $DOCKERME_LOG.log
-			else
-				echo " * DOCKER REMOVING ALL CONTAINER IMAGES..............................................................................[FAIL] CODE UNI4 "
-				echo $d `users` ": [FAIL] : DOCKER REMOVING ALL CONTAINER IMAGES: CODE UNI4 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 5 ]]; then
-			sudo apt-get purge -y docker-ce 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER PURGE......................................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER PURGE" >> $DOCKERME_LOG.log
-			else
-				echo " * DOCKER PURGING....................................................................................................[FAIL] CODE UNI5 "
-				echo $d `users` ": [FAIL] : DOCKER PURGING : CODE UNI5 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 6 ]]; then
-			sudo rm -rf /var/lib/docker /etc/docker /etc/systemd/system/docker.service /etc/init/d/docker /usr/local/bin/docker-compose $DOCKERME_DIRECTORY $HOME_PATH_DIRECTORY 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * REMOVE EXTRA CONFIG FILE..........................................................................................[OK]"
-				echo $d `users` ": [OK] : OCKER REMOVE EXTRA CONFIG FILE" >> $DOCKERME_LOG.log
-			else
-				echo " * REMOVING EXTRA CONFIG FILE........................................................................................[FAIL] CODE UNI6 "
-				echo $d `users` ": [FAIL] : DOCKER REMOVING EXTRA CONFIG FILE : CODE UNI6 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 7 ]]; then
-			sudo apt-get autoremove --purge -y docker-ce 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DOCKER REMOVE.....................................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER REMOVE" >> $DOCKERME_LOG.log
-			else
-				echo " * DOCKER REMOVING...................................................................................................[FAIL] CODE UNI7 "
-				echo $d `users` ": [FAIL] : DOCKER REMOVING : CODE UNI7 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 8 ]]; then
-			sudo apt-get autoclean 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * AUTOREMOVE AUTOCLEAN..............................................................................................[OK]"
-				echo $d `users` ": [OK] : DOCKER AUTOREMOVE AUTOCLEAN" >> $DOCKERME_LOG.log
-			else
-				echo " * AUTOREMOVING AUTOCLEANING.........................................................................................[FAIL] CODE UNI8 "
-				echo $d `users` ": [FAIL] : DOCKER AUTOREMOVING AUTOCLEANING : CODE UNI8 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 9 ]]; then
-			crontab -u root -l | grep -v 'medv'  | crontab -u root - 1>/dev/null 2>&1;
-			if [[ $? -eq 0 ]]; then
-				echo " * DELEATE SCHEDULED BACKUP FROM CRONTAB.............................................................................[OK]"
-				echo $d `users` ": [OK] : DELEATE SCHEDULED BACKUP FROM CRONTAB" >> $DOCKERME_LOG.log
-			else
-				echo " * DELEATING SCHEDULED BACKUP FROM CRONTAB...........................................................................[FAIL] CODE UNI9 "
-				echo $d `users` ": [FAIL] : DELEATING SCHEDULED BACKUP FROM CRONTAB : CODE UNI9 " >> $DOCKERME_LOG.log
-				exit
-			fi
-		elif [[ $i -eq 10 ]]; then
-			echo " * DOCKERME UNINSTALL.............................................................................................[COMPLETED]"
-			echo $d `users` ": [OK] : DOCKERME UNINSTALL" >> $DOCKERME_LOG.log
-		fi
-	  progress_step
-	done 
-}
-function DOCKERME_IF_DOCKERME_INSTALLED(){
+DOCKERME_IF_DOCKERME_INSTALLED(){
 	if ! [[ $(which docker) && $(docker --version) ]]; then
 		echo " * DOCKER NOT FOUND...........................................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOCKER NOT FOUND" >> $DOCKERME_LOG.log
@@ -511,7 +521,7 @@ function DOCKERME_IF_DOCKERME_INSTALLED(){
 		exit
     fi 
 }
-function DOCKERME_YML_LIST(){
+DOCKERME_YML_LIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED
 	ls -1 $DOCKERME_YML_DIRECTORY 1>/dev/null 2>&1;
 	if [ $? -eq 0 ]; then
@@ -528,7 +538,7 @@ function DOCKERME_YML_LIST(){
 		exit
 	fi
 }
-function DOCKERME_YML_UPDATE(){
+DOCKERME_YML_UPDATE(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
 	progress_max_lines=1
@@ -561,18 +571,29 @@ function DOCKERME_YML_UPDATE(){
 		progress_step
 	done
 }
-function DOCKERME_IF_WEBSITE_DIRECTORY_EXIST(){
-	
-	. $DOCKERME_CONFIG
-	# echo $HOME_PATH_DIRECTORY
-	if [[ -d /home/dockerme-docker/ayoub.com ]]; then
+DOCKERME_IF_WEBSITE_DIRECTORY_EXIST(){
+	. /$DOCKERME_CONFIG
+	if [ -d $HOME_PATH_DIRECTORY/$1 ]; then
 		echo " * DOMAINE NAME ALRADY HOSTED BY DOCKERME...........................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOMAINE NAME $DOMAINE_NAME ALRADY HOSTED BY DOCKERME " >> $DOCKERME_LOG.log
 		exit
-    fi
+	fi
+}
+DOCKERME_IF_YML_EXIST(){
+	if [ ! -f $DOCKERME_YML_DIRECTORY/$1 ]; then
+		echo " * YML FILE NOT FOUND...............................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : YML FILE $1 NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+	fi
+}
+DOCKERME_IF_NGINX-PROXY_EXIST(){
+	#
+}
+DOCKERME_CREATE_CONTAINER(){
+	#DOMAINE_NAME
+	#YML
 }
 
 
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
-DOCKERME_IF_WEBSITE_DIRECTORY_EXIST
