@@ -595,7 +595,7 @@ DOCKERME_IF_YML_EXIST(){
 DOCKERME_IF_NGINX-PROXY_EXIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED 
 	if [[ ! "$(docker ps -q -f name=nginx-proxy)" ]]; then
-  		echo " * NGIX-PROXY CONTAINER NOT FOUND...................................................................................[FAIL]"
+  		echo " * NGIX-PROXY CONTAINER NOT FOUND....................................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : NGINX-PROXY CONTAINER NOT FOUND" >> $DOCKERME_LOG.log
 		exit
 	fi
@@ -604,29 +604,37 @@ DOCKERME_CREATE_CONTAINERS(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
 	progress_max_lines=1
-	PROGRESS_NUMBER_OF_STEPS=${1:-4}
+	PROGRESS_NUMBER_OF_STEPS=${1:-5}
 	DOCKERME_PROGRESS
 	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
 		if [[ $i -eq 1 ]]; then
 			echo " * CREATE CONTAINERS.................................................................................................[INITIALIZING]"
 			echo $d `users` ": [INITIALIZING] : CREATING CONTAINERS" >> $DOCKERME_LOG.log
-		fi
-		if [[ $i -eq 2 ]]; then
+		elif [[ $i -eq 2 ]]; then
 			DOCKERME_IF_NGINX-PROXY_EXIST
 			echo " * CHECK NGINX-PROXY CONTAINER.......................................................................................[OK]"
 			echo $d `users` ": [OK] : CHEKING NGINX-PROXY CONTAINER" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 3 ]]; then
-			DOCKERME_IF_YML_EXIST wordpress4.9.5-php7.0-apache_mysql5.7.22
+			DOCKERME_IF_YML_EXIST $YML
 			echo " * CHECK YML FILE....................................................................................................[OK]"
-			echo $d `users` ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/wordpress4.9.5-php7.0-apache_mysql5.7.22" >> $DOCKERME_LOG.log
+			echo $d `users` ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/$YML" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 4 ]]; then
-			DOCKERME_IF_WEBSITE_DIRECTORY_EXIST ayoub.tn
+			DOCKERME_IF_WEBSITE_DIRECTORY_EXIST $DOMAINE_NAME
 			echo " * CHECK IF DOMAINE NAME NOT USED....................................................................................[OK]"
-			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME ayoub.tn NOT USED" >> $DOCKERME_LOG.log
+			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME $DOMAINE_NAME NOT USED" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 5 ]]; then
+			mkdir $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * CREATE HOME DIRECTORY.............................................................................................[OK]"
+				echo $d `users` ": [OK] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME" >> $DOCKERME_LOG.log
+			else
+				echo " * CREATING HOME DIRECTORY............................................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME : CODE CC05" >> $DOCKERME_LOG.log
+			fi
 		fi
 		progress_step
 	done
 }
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
-DOCKERME_CREATE_CONTAINERS
+#DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CREATE_CONTAINERS
