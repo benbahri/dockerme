@@ -276,7 +276,7 @@ DOCKERME_UNINSTALL(){
 				#exit
 			fi
 		elif [[ $i -eq 9 ]]; then
-			crontab -u root -l | grep -v 'medv'  | crontab -u root - 1>/dev/null 2>&1;
+			crontab -u root -l | grep -v 'dockerme'  | crontab -u root - 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * DELEATE SCHEDULED BACKUP FROM CRONTAB...............................................................................[OK]"
 				echo $d `users` ": [OK] : DELEATE SCHEDULED BACKUP FROM CRONTAB" >> $DOCKERME_LOG.log
@@ -589,12 +589,13 @@ DOCKERME_IF_YML_EXIST(){
 		exit
 	fi
 }
-DOCKERME_IF_NGINX-PROXY_EXIST(){ 
-  # 
-} 
-DOCKERME_CREATE_CONTAINER(){ 
-  #DOMAINE_NAME 
-  #YML 
+DOCKERME_IF_NGINX-PROXY_EXIST(){
+	DOCKERME_IF_DOCKERME_INSTALLED 
+	if [[ ! "$(docker ps -q -f name=nginx-proxy)" ]]; then
+  		echo " * NGIX-PROXY CONTAINER NOT FOUND...................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : NGINX-PROXY CONTAINER NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+	fi
 } 
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
