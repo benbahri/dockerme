@@ -579,7 +579,7 @@ DOCKERME_IF_WEBSITE_DIRECTORY_EXIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED
 	. /$DOCKERME_CONFIG
 	if [ -d $HOME_PATH_DIRECTORY/$1 ]; then
-		echo " * DOMAINE NAME ALRADY HOSTED BY DOCKERME...........................................................................[FAIL]"
+		echo " * DOMAINE NAME ALRADY HOSTED BY DOCKERME............................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOMAINE NAME $DOMAINE_NAME ALRADY HOSTED BY DOCKERME " >> $DOCKERME_LOG.log
 		exit
 	fi
@@ -594,7 +594,7 @@ DOCKERME_IF_YML_EXIST(){
 }
 DOCKERME_IF_NGINX-PROXY_EXIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED 
-	if [[ ! "$(docker ps -q -f name=nginx-proxy)" ]]; then
+	if [[ ! "$(docker ps -a | grep nginx-proxy)" ]]; then
   		echo " * NGIX-PROXY CONTAINER NOT FOUND....................................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : NGINX-PROXY CONTAINER NOT FOUND" >> $DOCKERME_LOG.log
 		exit
@@ -603,8 +603,8 @@ DOCKERME_IF_NGINX-PROXY_EXIST(){
 DOCKERME_CREATE_CONTAINERS(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
-	progress_max_lines=1
-	PROGRESS_NUMBER_OF_STEPS=${1:-5}
+	PROGRESS_NUMBER_OF_STEPS=${1:-6}
+	progress_line_number=1
 	DOCKERME_PROGRESS
 	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
 		if [[ $i -eq 1 ]]; then
@@ -631,10 +631,19 @@ DOCKERME_CREATE_CONTAINERS(){
 				echo " * CREATING HOME DIRECTORY............................................................................................[FAIL]"
 				echo $d `users` ": [FAIL] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME : CODE CC05" >> $DOCKERME_LOG.log
 			fi
+		elif [[ $i -eq 6 ]]; then
+			touch $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * CREATE docker-compose.yml AS EMPTY FILE...........................................................................[OK]"
+				echo $d `users` ": [OK] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				echo " * CREATING HOME DIRECTORY............................................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC06" >> $DOCKERME_LOG.log
+			fi
 		fi
 		progress_step
 	done
 }
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
-#DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CREATE_CONTAINERS
+DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CREATE_CONTAINERS
