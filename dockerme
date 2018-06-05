@@ -600,5 +600,33 @@ DOCKERME_IF_NGINX-PROXY_EXIST(){
 		exit
 	fi
 } 
+DOCKERME_CREATE_CONTAINERS(){
+	PROGRESS_STICKY=yes
+	PROGRESS_WIDTH=100
+	progress_max_lines=1
+	PROGRESS_NUMBER_OF_STEPS=${1:-4}
+	DOCKERME_PROGRESS
+	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
+		if [[ $i -eq 1 ]]; then
+			echo " * CREATE CONTAINERS.................................................................................................[INITIALIZING]"
+			echo $d `users` ": [INITIALIZING] : CREATING CONTAINERS" >> $DOCKERME_LOG.log
+		fi
+		if [[ $i -eq 2 ]]; then
+			DOCKERME_IF_NGINX-PROXY_EXIST
+			echo " * CHECK NGINX-PROXY CONTAINER.......................................................................................[OK]"
+			echo $d `users` ": [OK] : CHEKING NGINX-PROXY CONTAINER" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 3 ]]; then
+			DOCKERME_IF_YML_EXIST wordpress4.9.5-php7.0-apache_mysql5.7.22
+			echo " * CHECK YML FILE....................................................................................................[OK]"
+			echo $d `users` ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/wordpress4.9.5-php7.0-apache_mysql5.7.22" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 4 ]]; then
+			DOCKERME_IF_WEBSITE_DIRECTORY_EXIST ayoub.tn
+			echo " * CHECK IF DOMAINE NAME NOT USED....................................................................................[OK]"
+			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME ayoub.tn NOT USED" >> $DOCKERME_LOG.log
+		fi
+		progress_step
+	done
+}
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
+DOCKERME_CREATE_CONTAINERS
