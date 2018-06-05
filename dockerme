@@ -603,7 +603,7 @@ DOCKERME_IF_NGINX-PROXY_EXIST(){
 DOCKERME_CREATE_CONTAINERS(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
-	PROGRESS_NUMBER_OF_STEPS=${1:-6}
+	PROGRESS_NUMBER_OF_STEPS=${1:-9}
 	progress_line_number=1
 	DOCKERME_PROGRESS
 	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
@@ -639,6 +639,44 @@ DOCKERME_CREATE_CONTAINERS(){
 			else
 				echo " * CREATING HOME DIRECTORY............................................................................................[FAIL]"
 				echo $d `users` ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC06" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 7 ]]; then
+			touch $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				echo " * CREATE docker-compose.yml AS EMPTY FILE...........................................................................[OK]"
+				echo $d `users` ": [OK] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				echo " * CREATING HOME DIRECTORY............................................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC07" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 8 ]]; then
+			cat $DOCKERME_YML_DIRECTORY/$YML > $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml
+			if [[ $? -eq 0 ]]; then
+				echo " * COPY YML FILE IN docker-compose.yml...............................................................................[OK]"
+				echo $d `users` ": [OK] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				echo " * COPYING YML FILE IN docker-compose.yml.............................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC08" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 9 ]]; then
+			cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME
+			sudo sed -i -e  's/$host/'$DOMAINE_NAME'/g' docker-compose.yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				sudo sed -i -e 's|$path|'$HOME_PATH_DIRECTORY'|g' docker-compose.yml 1>/dev/null 2>&1;
+				if [[ $? -eq 0 ]]; then
+					echo " * COMPOSE docker-compose.yml........................................................................................[OK]"
+					echo $d `users` ": [OK] : COMPOSE $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+				else
+					echo " * COMPOSING YML FILE................................................................................................[FAIL]"
+					echo $d `users` ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC09" >> $DOCKERME_LOG.log
+					exit
+				fi
+
+			else
+				echo " * COMPOSING YML FILE................................................................................................[FAIL]"
+				echo $d `users` ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC09+" >> $DOCKERME_LOG.log
+				exit
 			fi
 		fi
 		progress_step
