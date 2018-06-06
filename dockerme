@@ -704,6 +704,14 @@ DOCKERME_LOG_VIEW(){
 		echo $d `users` ": [FAIL] : VIEWING LOG : CODE VL01" >> $DOCKERME_LOG.log	
 	fi	
 }
+DOCKERME_LOG_TRUNCATE(){
+	DOCKERME_IF_DOCKERME_INSTALLED
+	truncate -s 0 $DOCKERME_LOG.log
+	if [[ ! $? -eq 0 ]]; then
+		echo " * TRUNCATE LOG........................................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : TRUNCATING LOG : CODE VT01" >> $DOCKERME_LOG.log	
+	fi	
+}
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CREATE_CONTAINERS
