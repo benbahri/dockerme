@@ -1,5 +1,5 @@
 #!/bin/bash
-DOCKERME_HELP(){
+DOCKERME_SHOW_HELP(){
 	echo " "
 	echo "Usage: medv option1 -arguments --subarguments"
 	echo " "
@@ -20,8 +20,6 @@ DOCKERME_HELP(){
 	echo "    dockerme -stop domainename.tld              stop specific domainename.tld"
 	echo "    dockerme -log --view                        read docker log file"
 	echo "    dockerme -log --trancate                    trancate docker log file"
-	echo "    dockerme -config --view                     read medv docker config file"
-	echo "    dockerme -config --edit                     edit medv docker config file"
 	echo "    dockerme -u --all                           remove all" 
 }
 DOCKERME_VERSION(){
@@ -807,7 +805,6 @@ DOCKERME_GLOBAL_VARS
 #DOCKERME_LOG_TRUNCATE
 DOCKERME_INSTALL
 #DOCKERME_UNINSTALL
-
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CONTAINERS_CREATE
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_START
