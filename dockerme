@@ -639,6 +639,7 @@ DOCKERME_CONTAINERS_CREATE(){
 			echo " * CHECK IF DOMAINE NAME NOT USED......................................................................................[OK]"
 			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME $DOMAINE_NAME NOT USED" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 5 ]]; then
+			. /$DOCKERME_CONFIG
 			mkdir $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * CREATE HOME DIRECTORY...............................................................................................[OK]"
@@ -648,6 +649,7 @@ DOCKERME_CONTAINERS_CREATE(){
 				echo $d `users` ": [FAIL] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME : CODE CC05" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 6 ]]; then
+			. /$DOCKERME_CONFIG
 			touch $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * CREATE DOCKER-COMPOSE.YML AS EMPTY FILE.............................................................................[OK]"
@@ -657,6 +659,7 @@ DOCKERME_CONTAINERS_CREATE(){
 				echo $d `users` ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC06" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 7 ]]; then
+			. /$DOCKERME_CONFIG
 			cat $DOCKERME_YML_DIRECTORY/$YML > $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml
 			if [[ $? -eq 0 ]]; then
 				echo " * COPY YML FILE IN docker-compose.yml.................................................................................[OK]"
@@ -667,6 +670,7 @@ DOCKERME_CONTAINERS_CREATE(){
 				exit
 			fi
 		elif [[ $i -eq 8 ]]; then
+			. /$DOCKERME_CONFIG
 			cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME
 			sudo sed -i -e  's/$host/'$DOMAINE_NAME'/g' docker-compose.yml 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
@@ -686,6 +690,7 @@ DOCKERME_CONTAINERS_CREATE(){
 				exit
 			fi
 		elif [[ $i -eq 9 ]]; then
+			. /$DOCKERME_CONFIG
 			docker-compose up -d 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				echo " * START CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML......................................................................[OK]"
@@ -712,6 +717,19 @@ DOCKERME_CONTAINERS_CREATE(){
 		progress_step
 	done
 }
+DOCKERME_CONTAINERS_STOP(){
+	. /$DOCKERME_CONFIG
+	cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
+	docker-compose down 1>/dev/null 2>&1;
+	if [[ $? -eq 0 ]]; then
+		echo " * STOP CONTAINERS.....................................................................................................[OK]"
+		echo $d `users` ": [OK] : STOP CONTAINERS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+	else
+		echo " * STOPING CONTAINER...................................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : STOPING CONTAINERS FORM $DOMAINE_NAME : CODE CSTO01" >> $DOCKERME_LOG.log
+	fi
+}
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CONTAINERS_CREATE
+DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_STOP
