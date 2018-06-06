@@ -193,6 +193,19 @@ DOCKERME_PROGRESS(){
 	  progress_start
 	fi 
 }
+DOCKERME_LOG_WRITE(){
+	COLOR_RED=`tput setaf 1`
+	COLOR_GREEN=`tput setaf 2`
+	COLOR_RESET=`tput sgr0`
+    # Get the number of columns, but subtact 8 to leave space for the status.
+    local COLUMNS=$((COLUMNS-160))
+    # Print left-aligned message and right-aligned status.
+    if [[ $STATUS -eq 1 ]]; then
+    	printf "%-*s [%s] \n" "$COLUMNS" "$MESSAGES" "$COLOR_GREEN$STATUS_MSG$COLOR_RESET"
+    else
+    	printf "%-*s [%s] \n" "$COLUMNS" "$MESSAGES" "$COLOR_RED$STATUS_MSG$COLOR_RESET"
+    fi   
+}
 DOCKERME_UNINSTALL(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
@@ -659,48 +672,48 @@ DOCKERME_CONTAINERS_CREATE(){
 	DOCKERME_PROGRESS
 	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
 		if [[ $i -eq 1 ]]; then
-			echo " * CREATE CONTAINERS...................................................................................................[INITIALIZING]"
+			echo " * CREATE CONTAINERS\t: [INITIALIZING]"
 			echo $d `users` ": [INITIALIZING] : CREATING CONTAINERS" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 2 ]]; then
 			DOCKERME_IF_NGINX-PROXY_EXIST
-			echo " * CHECK NGINX-PROXY CONTAINER.........................................................................................[OK]"
+			echo " * CHECK NGINX-PROXY CONTAINER\t: [OK]"
 			echo $d `users` ": [OK] : CHEKING NGINX-PROXY CONTAINER" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 3 ]]; then
 			DOCKERME_IF_YML_EXIST $YML
-			echo " * CHECK YML FILE......................................................................................................[OK]"
+			echo " * CHECK YML FILE\t: [OK]"
 			echo $d `users` ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/$YML" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 4 ]]; then
 			DOMAINE_NAME=$DOMAINE_NAME DOCKERME_IF_WEBSITE_DIRECTORY_EXIST
-			echo " * CHECK IF DOMAINE NAME NOT USED......................................................................................[OK]"
+			echo " * CHECK IF DOMAINE NAME NOT USED\t: [OK]"
 			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME $DOMAINE_NAME NOT USED" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 5 ]]; then
 			. /$DOCKERME_CONFIG
 			mkdir $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * CREATE HOME DIRECTORY...............................................................................................[OK]"
+				echo " * CREATE HOME DIRECTORY\t: [OK]"
 				echo $d `users` ": [OK] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATING HOME DIRECTORY.............................................................................................[FAIL]"
+				echo " * CREATING HOME DIRECTORY\t: FAIL]"
 				echo $d `users` ": [FAIL] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME : CODE CC05" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 6 ]]; then
 			. /$DOCKERME_CONFIG
 			touch $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * CREATE DOCKER-COMPOSE.YML AS EMPTY FILE.............................................................................[OK]"
+				echo " * CREATE DOCKER-COMPOSE.YML AS EMPTY FILE\t: [OK]"
 				echo $d `users` ": [OK] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
 			else
-				echo " * CREATE DOCKER-COMPOSE.YML AS EMPTY FILE.............................................................................[FAIL]"
+				echo " * CREATE DOCKER-COMPOSE.YML AS EMPTY FILE\t: [FAIL]"
 				echo $d `users` ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC06" >> $DOCKERME_LOG.log
 			fi
 		elif [[ $i -eq 7 ]]; then
 			. /$DOCKERME_CONFIG
 			cat $DOCKERME_YML_DIRECTORY/$YML > $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml
 			if [[ $? -eq 0 ]]; then
-				echo " * COPY YML FILE IN docker-compose.yml.................................................................................[OK]"
+				echo " * COPY YML FILE IN docker-compose.yml\t: [OK]"
 				echo $d `users` ": [OK] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
 			else
-				echo " * COPYING YML FILE IN docker-compose.yml..............................................................................[FAIL]"
+				echo " * COPYING YML FILE IN docker-compose.yml\t: [FAIL]"
 				echo $d `users` ": [FAIL] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC07" >> $DOCKERME_LOG.log
 				exit
 			fi
@@ -711,16 +724,16 @@ DOCKERME_CONTAINERS_CREATE(){
 			if [[ $? -eq 0 ]]; then
 				sudo sed -i -e 's|$path|'$HOME_PATH_DIRECTORY'|g' docker-compose.yml 1>/dev/null 2>&1;
 				if [[ $? -eq 0 ]]; then
-					echo " * COMPOSE docker-compose.yml..........................................................................................[OK]"
+					echo " * COMPOSE docker-compose.yml\t: [OK]"
 					echo $d `users` ": [OK] : COMPOSE $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
 				else
-					echo " * COMPOSING YML FILE..................................................................................................[FAIL]"
+					echo " * COMPOSING YML FILE:\t: [FAIL]"
 					echo $d `users` ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC08" >> $DOCKERME_LOG.log
 					exit
 				fi
 
 			else
-				echo " * COMPOSING YML FILE..................................................................................................[FAIL]"
+				echo " * COMPOSING YML FILE\t: [FAIL]"
 				echo $d `users` ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC08+" >> $DOCKERME_LOG.log
 				exit
 			fi
@@ -728,25 +741,25 @@ DOCKERME_CONTAINERS_CREATE(){
 			. /$DOCKERME_CONFIG
 			docker-compose up -d 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * START CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML......................................................................[OK]"
+				echo " * START CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML\t: [OK]"
 				echo $d `users` ": [OK] : STARTING CONTAINERS FROM $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
 			else
-				echo " * STARTING CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML...................................................................[FAIL]"
+				echo " * STARTING CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML\t: [FAIL]"
 				echo $d `users` ": [FAIL] : STARTING CONTAINERS FROM $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC09" >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 10 ]]; then
 			docker container restart nginx-proxy 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				echo " * APPLICATE CONFIGURATION INSIDE NGINX-PROXY CONTAINER................................................................[OK]"
+				echo " * APPLICATE CONFIGURATION INSIDE NGINX-PROXY CONTAINER\t: [OK]"
 				echo $d `users` ": [OK] : APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
 			else
-				echo " * APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER...............................................................[FAIL]"
+				echo " * APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER\t: [FAIL]"
 				echo $d `users` ": [FAIL] : APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER FOR $DOMAINE_NAME : CODE CC10" >> $DOCKERME_LOG.log
 				exit
 			fi
 		elif [[ $i -eq 11 ]]; then
-			echo " * CREATE CONTAINERS...................................................................................................[COMPLETED]"
+			echo " * CREATE CONTAINERS\t: [COMPLETED]"
 			echo $d `users` ": [OK] : CREATE CONTAINERS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
 		fi
 		progress_step
@@ -791,11 +804,13 @@ DOCKERME_GLOBAL_VARS
 #DOCKERME_YML_LIST
 #DOCKERME_YML_UPDATE
 #DOCKERME_LOG_TRUNCATE
+
+#MESSAGES="segsegsdggdfgdfgdfsdg" STATUS=1 STATUS_MSG="INITIALIZING" DOCKERME_LOG_WRITE
+#MESSAGES="AYOfdshdsfhsdfhsdfhUB" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+#MESSAGES="AYdsfhsdfhdsfhdsfhOUB" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+#MESSAGES="AYdsfhsdfhdsfhdsfhOUB" STATUS=1 STATUS_MSG="COMPLETED" DOCKERME_LOG_WRITE
+
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CONTAINERS_CREATE
-DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
+#DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_START
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_STOP
-
-
-
-
