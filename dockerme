@@ -524,6 +524,22 @@ DOCKERME_IF_DOCKERME_INSTALLED(){
 		exit
     fi 
 }
+DOCKERME_LOG_VIEW(){
+	DOCKERME_IF_DOCKERME_INSTALLED
+	tail -f $DOCKERME_LOG.log
+	if [[ ! $? -eq 0 ]]; then
+		echo " * WIEW LOG............................................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : VIEWING LOG : CODE VL01" >> $DOCKERME_LOG.log	
+	fi	
+}
+DOCKERME_LOG_TRUNCATE(){
+	DOCKERME_IF_DOCKERME_INSTALLED
+	truncate -s 0 $DOCKERME_LOG.log
+	if [[ ! $? -eq 0 ]]; then
+		echo " * TRUNCATE LOG........................................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : TRUNCATING LOG : CODE VT01" >> $DOCKERME_LOG.log	
+	fi	
+}
 DOCKERME_YML_LIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED
 	ls -1 $DOCKERME_YML_DIRECTORY 1>/dev/null 2>&1;
@@ -695,22 +711,6 @@ DOCKERME_CREATE_CONTAINERS(){
 		fi
 		progress_step
 	done
-}
-DOCKERME_LOG_VIEW(){
-	DOCKERME_IF_DOCKERME_INSTALLED
-	tail -f $DOCKERME_LOG.log
-	if [[ ! $? -eq 0 ]]; then
-		echo " * WIEW LOG............................................................................................................[FAIL]"
-		echo $d `users` ": [FAIL] : VIEWING LOG : CODE VL01" >> $DOCKERME_LOG.log	
-	fi	
-}
-DOCKERME_LOG_TRUNCATE(){
-	DOCKERME_IF_DOCKERME_INSTALLED
-	truncate -s 0 $DOCKERME_LOG.log
-	if [[ ! $? -eq 0 ]]; then
-		echo " * TRUNCATE LOG........................................................................................................[FAIL]"
-		echo $d `users` ": [FAIL] : TRUNCATING LOG : CODE VT01" >> $DOCKERME_LOG.log	
-	fi	
 }
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
