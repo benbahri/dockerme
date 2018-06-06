@@ -496,7 +496,7 @@ DOCKERME_INSTALL(){
 		elif [[ $i -eq 17 ]]; then
 			docker run --name portainer -p 9000:9000 -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data -d portainer/portainer 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
-				MESSAGES="CREATE PORTAINER CONTAINER" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				MESSAGES="CREATE PORTAINER CONTAINER ACCESSIBLE VIA http://127.0.0.1/:9000" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
 				echo $d `users` ": [OK] : CREATE PORTAINER CONTAINER" >> $DOCKERME_LOG.log
 			else
 				MESSAGES="CREATING PORTAINER CONTAINER" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
