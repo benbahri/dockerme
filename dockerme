@@ -594,7 +594,7 @@ DOCKERME_YML_UPDATE(){
 DOCKERME_IF_WEBSITE_DIRECTORY_EXIST(){
 	DOCKERME_IF_DOCKERME_INSTALLED
 	. /$DOCKERME_CONFIG
-	if [ -d $HOME_PATH_DIRECTORY/$1 ]; then
+	if [ -d $HOME_PATH_DIRECTORY/$DOMAINE_NAME ]; then
 		echo " * DOMAINE NAME ALRADY HOSTED BY DOCKERME............................................................................[FAIL]"
 		echo $d `users` ": [FAIL] : DOMAINE NAME $DOMAINE_NAME ALRADY HOSTED BY DOCKERME " >> $DOCKERME_LOG.log
 		exit
@@ -635,7 +635,7 @@ DOCKERME_CONTAINERS_CREATE(){
 			echo " * CHECK YML FILE......................................................................................................[OK]"
 			echo $d `users` ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/$YML" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 4 ]]; then
-			DOCKERME_IF_WEBSITE_DIRECTORY_EXIST $DOMAINE_NAME
+			DOMAINE_NAME=$DOMAINE_NAME DOCKERME_IF_WEBSITE_DIRECTORY_EXIST
 			echo " * CHECK IF DOMAINE NAME NOT USED......................................................................................[OK]"
 			echo $d `users` ": [OK] : CHEKING IF DOMAINE NAME $DOMAINE_NAME NOT USED" >> $DOCKERME_LOG.log
 		elif [[ $i -eq 5 ]]; then
@@ -729,7 +729,19 @@ DOCKERME_CONTAINERS_STOP(){
 		echo $d `users` ": [FAIL] : STOPING CONTAINERS FORM $DOMAINE_NAME : CODE CSTO01" >> $DOCKERME_LOG.log
 	fi
 }
+DOCKERME_CONTAINERS_START(){
+	. /$DOCKERME_CONFIG
+	cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
+	docker-compose up -d 1>/dev/null 2>&1;
+	if [[ $? -eq 0 ]]; then
+		echo " * START CONTAINERS....................................................................................................[OK]"
+		echo $d `users` ": [OK] : STARTING CONTAINERS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+	else
+		echo " * STARTING CONTAINER...................................................................................................[FAIL]"
+		echo $d `users` ": [FAIL] : STARTING CONTAINERS FORM $DOMAINE_NAME : CODE CSTA01" >> $DOCKERME_LOG.log
+	fi
+}
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CONTAINERS_CREATE
-DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_STOP
+DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_START
