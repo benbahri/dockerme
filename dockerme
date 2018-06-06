@@ -755,7 +755,7 @@ DOCKERME_CONTAINERS_CREATE(){
 DOCKERME_CONTAINERS_REMOVE(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
-	PROGRESS_NUMBER_OF_STEPS=${1:-11}
+	PROGRESS_NUMBER_OF_STEPS=${1:-5}
 	progress_line_number=1
 	DOCKERME_PROGRESS
 	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
@@ -769,6 +769,7 @@ DOCKERME_CONTAINERS_REMOVE(){
 		elif [[ $i -eq 3 ]]; then
 			DOMAINE_NAME=$DOMAINE_NAME DOCKERME_CONTAINERS_STOP
 		elif [[ $i -eq 4 ]]; then
+			. /$DOCKERME_CONFIG
 			sudo rm -r $HOME_PATH_DIRECTORY/$DOMAINE_NAME
 			if [[ $? -eq 0 ]]; then
 				echo " * DELETE HOME DIRECTORY...............................................................................................[OK]"
@@ -778,7 +779,7 @@ DOCKERME_CONTAINERS_REMOVE(){
 				echo $d `users` ": [FAIL] : DELETING HOME DIRECTORY FOR $DOMAINE_NAME : CODE CR01" >> $DOCKERME_LOG.log
 				exit
 			fi
-		elif [[ $i -eq 11 ]]; then
+		elif [[ $i -eq 5 ]]; then
 			echo " * REMOVE CONTAINERS...................................................................................................[COMPLETED]"
 			echo $d `users` ": [COMPLETED] : REMOVING CONTAINERS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
 		fi
@@ -787,11 +788,14 @@ DOCKERME_CONTAINERS_REMOVE(){
 }
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
+#DOCKERME_YML_LIST
+#DOCKERME_YML_UPDATE
+#DOCKERME_LOG_TRUNCATE
 #DOMAINE_NAME=ayoub.tn YML=wordpress4.9.5-php7.0-apache_mysql5.7.22 DOCKERME_CONTAINERS_CREATE
+DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_START
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_STOP
-#DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
-#DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_REMOVE
+
 
 
 
