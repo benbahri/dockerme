@@ -814,7 +814,8 @@ DOCKERME_CONTAINERS_BACKUP(){
 		elif [[ $i -eq 3 ]]; then
 			DOMAINE_NAME=$DOMAINE_NAME DOCKERME_CONTAINERS_STOP
 		elif [[ $i -eq 4 ]]; then
-			zip -r $D.zip $HOME_PATH_DIRECTORY/$DOMAINE_NAME -x '*backup/*' 1>/dev/null 2>&1;
+			cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME
+			zip -r $D.zip * -x '*backup/*' 1>/dev/null 2>&1;
 			if [[ $? -eq 0 ]]; then
 				MESSAGES="CREATE ARCHIVE FILE $D.zip" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
 				echo $d ": [OK] : CREATE ARCHIVE FILE $D.zip" >> $DOCKERME_LOG.log
