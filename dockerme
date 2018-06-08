@@ -948,7 +948,7 @@ DOCKERME_CONTAINERS_BACKUP_RESTORE(){
 	  progress_step
 	done 
 }
-reset
+clear
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
 if [[ -z "$1" ]]; then
@@ -964,29 +964,29 @@ elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--view"* ]] && [[ -z "$3" ]]; then
 elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--trancate"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_LOG_TRUNCATE
 elif [[ " $1 " = *"-c"* ]] && [[ -n "$3" ]] && [[ -n "$4" ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_CONTAINERS_CREATE"
+ 	DOCKERME_CONTAINERS_CREATE
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED"
+ 	echo "DOCKERME_BACKUPS_SCHADULED not uplemented yed!"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED"
+ 	echo "DOCKERME_BACKUPS_SCHADULED not implemented yet"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--list"* ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED_LIST"
+ 	echo "DOCKERME_BACKUPS_SCHADULED_LIST not implemented yet"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--add"* ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED_ADD"
+ 	echo "DOCKERME_BACKUPS_SCHADULED_ADD not implemented yet"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--delete"* ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE"
+ 	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_RESTORE_LIST"
+ 	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_RESTORE_LIST"
+ 	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_RESTORE_LIST"
+ 	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-rm"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	echo "DOCKERME_REMOVE_DOCKER"
 elif [[ " $1 " = *"-start"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
- 	echo "DOCKERME_CONTAINERS_START"
+ 	DOCKERME_CONTAINERS_START
 elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
- 	echo "DOCKERME_CONTAINERS_STOP"
+ 	DOCKERME_CONTAINERS_STOP
 elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_UNINSTALL
 else
