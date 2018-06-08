@@ -1,6 +1,9 @@
 #!/bin/bash
 DOCKERME_SHOW_HELP(){
 	echo " "
+	echo "DockerME V1.0 Mai 2018"
+	echo " "
+	echo " "
 	echo "Usage: dockerme option1 -arguments --subarguments"
 	echo " "
 	echo "    dockerme -i                                 install docker system with composer, portainer and nginx-proxy"
@@ -20,9 +23,6 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -log --trancate                    trancate docker log file"
 	echo "    dockerme -u --all                           remove all" 
 	echo " "
-}
-DOCKERME_VERSION(){
-	echo "DockerME V1.0 Mai 2018"
 }
 DOCKERME_HEADER(){
 	cat << "EOF"
