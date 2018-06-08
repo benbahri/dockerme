@@ -981,8 +981,8 @@ elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = 
  	echo "DOCKERME_BACKUPS_SCHADULED_ADD not implemented yet"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--delete"* ]] && [[ -z "$5" ]]; then
  	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE not implemented yet"
-elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_RESTORE_LIST not implemented yet"
+elif [[ " $1 " = *"-r"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+ 	DOMAINE_NAME=$2 BACKUP_FILE=$3 DOCKERME_CONTAINERS_BACKUP_RESTORE
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
  	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ -z "$4" ]]; then
