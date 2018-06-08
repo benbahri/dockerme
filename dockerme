@@ -3,16 +3,14 @@ DOCKERME_SHOW_HELP(){
 	echo " "
 	echo "Usage: dockerme option1 -arguments --subarguments"
 	echo " "
-	echo "    --v, --version   	                          show version"
-	echo "    --h, --help       	                      show help"
 	echo "    dockerme -i                                 install docker system with composer, portainer and nginx-proxy"
 	echo "    dockerme -yml --list                        list of yml files"
 	echo "    dockerme -yml --update                      update yml files"
 	echo "    dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
 	echo "    dockerme -b -s domainename.tld              create backup from specific domainename.tld with a crontab"
-	echo "    dockerme -b -s --list domainename.tld       list a crontab file from specific domainename.tld"
-	echo "    dockerme -b -s --add domainename.tld        add a crontab from specific domainename.tld"
-	echo "    dockerme -b -s --delete domainename.tld     delete a crontab from specific domainename.tld"
+	echo "    dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld"
+	echo "    dockerme -b -s domainename.tld --add        add a crontab from specific domainename.tld"
+	echo "    dockerme -b -s domainename.tld --delete     delete a crontab from specific domainename.tld"
 	echo "    dockerme -r domainename.tld --list          list of backups loaded for specific domainename.tld"
 	echo "    dockerme -r domainename.tld backupfile      restore website volumes for specific domaiename.tld from specific backupfile"
 	echo "    dockerme -rm domainename.tld                remove dockers, volumes, backup and configuration for specific domainename.tld"
@@ -21,6 +19,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -log --view                        read docker log file"
 	echo "    dockerme -log --trancate                    trancate docker log file"
 	echo "    dockerme -u --all                           remove all" 
+	echo " "
 }
 DOCKERME_VERSION(){
 	echo "DockerME V1.0 Mai 2018"
@@ -204,6 +203,34 @@ DOCKERME_LOG_WRITE(){
     else
     	printf "%-*s [%s] \n" "$COLUMNS" " * $MESSAGES" "$COLOR_RED$STATUS_MSG$COLOR_RESET"
     fi   
+}
+DOCKERME_IF_DOCKERME_INSTALLED(){
+	if ! [[ $(which docker) && $(docker --version) ]]; then
+		MESSAGES="DOCKER NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+		echo $d ": [FAIL] : DOCKER NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+	fi	
+	if [[ ! -d $DOCKERME_DIRECTORY ]]; then
+		MESSAGES="DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+		echo $d ": [FAIL] : DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+    fi
+    if [[ ! -d $DOCKERME_YML_DIRECTORY ]]; then
+    	MESSAGES="DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+    	echo $d ": [FAIL] : DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+    fi
+    if [ ! -f $DOCKERME_CONFIG ]; then
+    	MESSAGES="DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+		echo $d ": [FAIL] : DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND" >> $DOCKERME_LOG.log
+		exit
+    fi
+    . /$DOCKERME_CONFIG
+    if [ -z $HOME_PATH_DIRECTORY ]; then
+    	MESSAGES="HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+		echo $d ": [FAIL] : HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY" >> $DOCKERME_LOG.log
+		exit
+    fi 
 }
 DOCKERME_UNINSTALL(){
 	PROGRESS_STICKY=yes
@@ -507,34 +534,6 @@ DOCKERME_INSTALL(){
 		fi
 	  progress_step
 	done 
-}
-DOCKERME_IF_DOCKERME_INSTALLED(){
-	if ! [[ $(which docker) && $(docker --version) ]]; then
-		MESSAGES="DOCKER NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
-		echo $d ": [FAIL] : DOCKER NOT FOUND" >> $DOCKERME_LOG.log
-		exit
-	fi	
-	if [[ ! -d $DOCKERME_DIRECTORY ]]; then
-		MESSAGES="DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
-		echo $d ": [FAIL] : DOCKERME REPOSITORY $DOCKERME_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
-		exit
-    fi
-    if [[ ! -d $DOCKERME_YML_DIRECTORY ]]; then
-    	MESSAGES="DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
-    	echo $d ": [FAIL] : DOCKERME YML REPOSITORY $DOCKERME_YML_DIRECTORY NOT FOUND" >> $DOCKERME_LOG.log
-		exit
-    fi
-    if [ ! -f $DOCKERME_CONFIG ]; then
-    	MESSAGES="DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
-		echo $d ": [FAIL] : DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG NOT FOUND" >> $DOCKERME_LOG.log
-		exit
-    fi
-    . /$DOCKERME_CONFIG
-    if [ -z $HOME_PATH_DIRECTORY ]; then
-    	MESSAGES="HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
-		echo $d ": [FAIL] : HOME_PATH_DIRECTORY IN DOCKERME CONFIGURATION FILE $DOCKERME_CONFIG IS EMPTY" >> $DOCKERME_LOG.log
-		exit
-    fi 
 }
 DOCKERME_LOG_VIEW(){
 	DOCKERME_IF_DOCKERME_INSTALLED
@@ -949,8 +948,51 @@ DOCKERME_CONTAINERS_BACKUP_RESTORE(){
 	  progress_step
 	done 
 }
+reset
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
+if [[ -z "$1" ]]; then
+	DOCKERME_SHOW_HELP
+elif [[ " $1 " = *"-i"* ]] && [[ -z "$2" ]]; then
+	DOCKERME_INSTALL
+elif [[ " $1 " = *"-yml"* ]] && [[ " $2 " = *"--list"* ]] && [[ -z "$3" ]]; then
+	DOCKERME_YML_LIST
+elif [[ " $1 " = *"-yml"* ]] && [[ " $2 " = *"--update"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_YML_UPDATE
+elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--view"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_LOG_VIEW
+elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--trancate"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_LOG_TRUNCATE
+elif [[ " $1 " = *"-c"* ]] && [[ -n "$3" ]] && [[ -n "$4" ]] && [[ -z "$5" ]]; then
+ 	echo "DOCKERME_CONTAINERS_CREATE"
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+ 	echo "DOCKERME_BACKUPS_SCHADULED"
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+ 	echo "DOCKERME_BACKUPS_SCHADULED"
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--list"* ]] && [[ -z "$5" ]]; then
+ 	echo "DOCKERME_BACKUPS_SCHADULED_LIST"
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--add"* ]] && [[ -z "$5" ]]; then
+ 	echo "DOCKERME_BACKUPS_SCHADULED_ADD"
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--delete"* ]] && [[ -z "$5" ]]; then
+ 	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE"
+elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
+ 	echo "DOCKERME_RESTORE_LIST"
+elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
+ 	echo "DOCKERME_RESTORE_LIST"
+elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ -z "$4" ]]; then
+ 	echo "DOCKERME_RESTORE_LIST"
+elif [[ " $1 " = *"-rm"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
+ 	echo "DOCKERME_REMOVE_DOCKER"
+elif [[ " $1 " = *"-start"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
+ 	echo "DOCKERME_CONTAINERS_START"
+elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
+ 	echo "DOCKERME_CONTAINERS_STOP"
+elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
+ 	echo "DOCKERME_UNINSTALL"
+else
+	dockerme
+fi
+
 #DOCKERME_YML_LIST
 #DOCKERME_YML_UPDATE
 #DOCKERME_LOG_TRUNCATE
@@ -962,4 +1004,6 @@ DOCKERME_GLOBAL_VARS
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_STOP
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_BACKUP
 #DOMAINE_NAME=ayoub.tn DOCKERME_CONTAINERS_BACKUP_LIST
-DOMAINE_NAME=ayoub.tn BACKUP_FILE=20180607115837.zip DOCKERME_CONTAINERS_BACKUP_RESTORE
+#DOMAINE_NAME=ayoub.tn BACKUP_FILE=20180607115837.zip DOCKERME_CONTAINERS_BACKUP_RESTORE
+
+
