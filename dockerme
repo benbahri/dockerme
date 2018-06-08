@@ -10,6 +10,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -yml --list                        list of yml files"
 	echo "    dockerme -yml --update                      update yml files"
 	echo "    dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
+	echo "    dockerme -b domainename.tld                 create backup from specific domainename.tld"
 	echo "    dockerme -b -s domainename.tld              create backup from specific domainename.tld with a crontab"
 	echo "    dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld"
 	echo "    dockerme -b -s domainename.tld --add        add a crontab from specific domainename.tld"
@@ -965,7 +966,9 @@ elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--trancate"* ]] && [[ -z "$3" ]]; 
  	DOCKERME_LOG_TRUNCATE
 elif [[ " $1 " = *"-c"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
  	DOMAINE_NAME=$2 YML=$3 DOCKERME_CONTAINERS_CREATE
- elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
+ 	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
  	echo "DOCKERME_BACKUPS_SCHADULED not uplemented yed!"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
  	echo "DOCKERME_BACKUPS_SCHADULED not implemented yet"
