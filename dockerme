@@ -988,11 +988,11 @@ elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ -z "$4" ]]; then
  	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-rm"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
- 	echo "DOCKERME_REMOVE_DOCKER"
+ 	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_REMOVE
 elif [[ " $1 " = *"-start"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
- 	DOCKERME_CONTAINERS_START
+ 	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_START
 elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
- 	DOCKERME_CONTAINERS_STOP
+ 	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_STOP
 elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_UNINSTALL
 else
