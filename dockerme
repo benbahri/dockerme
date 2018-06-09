@@ -1047,6 +1047,8 @@ elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" ]] && [[ "$3" = *"--older"* ]] && [[ "$4" ]] && [[ -z "$5" ]]; then
 	DOMAINE_NAME=$2 OLDER_THAN_N_DAYS=$4 DOCKERME_CONTAINERS_BACKUP_DELETE_OLD
+elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
+ 	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP_LIST
 #elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
 # 	echo "DOCKERME_BACKUPS_SCHADULED not uplemented yed!"
 #elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
