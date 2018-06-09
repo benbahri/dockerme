@@ -967,14 +967,14 @@ elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP_LIST
-elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED not uplemented yed!"
-elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED not implemented yet"
-elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--list"* ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED_LIST not implemented yet"
-elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--add"* ]] && [[ -z "$5" ]]; then
- 	echo "DOCKERME_BACKUPS_SCHADULED_ADD not implemented yet"
+#elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+# 	echo "DOCKERME_BACKUPS_SCHADULED not uplemented yed!"
+#elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
+# 	echo "DOCKERME_BACKUPS_SCHADULED not implemented yet"
+#elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--list"* ]] && [[ -z "$5" ]]; then
+# 	echo "DOCKERME_BACKUPS_SCHADULED_LIST not implemented yet"
+#elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--add"* ]] && [[ -z "$5" ]]; then
+# 	echo "DOCKERME_BACKUPS_SCHADULED_ADD not implemented yet"
 elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = *"--delete"* ]] && [[ -z "$5" ]]; then
  	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
