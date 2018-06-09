@@ -1,14 +1,14 @@
 #!/bin/bash
 DOCKERME_SHOW_HELP(){
 	echo " "
-	echo "Usage: dockerme -argument option --subarguments"
+	echo "Usage: dockerme -argument option1 option2 --subarguments"
 	echo " "
 	echo "    dockerme -i                                 install docker system with composer, portainer and nginx-proxy"
 	echo "    dockerme -yml --list                        list of yml files"
 	echo "    dockerme -yml --update                      update yml files"
 	echo "    dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
 	echo "    dockerme -b domainename.tld                 create backup from specific domainename.tld"
-	echo "    dockerme -b domainename.tld --older ndays   create backup from specific domainename.tld and delete backups older than ndays"
+	echo "    dockerme -b domainename.tld ndays --older   create backup from specific domainename.tld and delete backups older than ndays"
 	echo "    dockerme -b domainename.tld --list          list backup files for specific domainename.tld"
 	#echo "    dockerme -b -s domainename.tld              create backup from specific domainename.tld with a crontab"
 	#echo "    dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld"
@@ -1017,10 +1017,10 @@ DOCKERME_DELETE_OLD_BACKUP(){
 	find $HOME_PATH_DIRECTORY/$DOMAINE_NAME/* -mtime +7 -exec rm {} \; 1>/dev/null 2>&1;
 	if [[ $? -eq 0 ]]; then
 		MESSAGES="DELETE BACKUPS OLDER THAN $OLDER_THAN_N_DAYS FOR $DOMAINE_NAME" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
-		echo $d ": [OK] : DELETE BACKUPS OLDER THAN $OLDER_THAN_N_DAYS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+		echo $d ": [OK] : DELETE BACKUPS OLDER THAN $OLDER_THAN_N_DAYS DAY(S) FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
 	else
-		MESSAGES="DELETING BACKUPS OLDER THAN $OLDER_THAN_N_DAYS FOR $DOMAINE_NAME" STATUS=1 STATUS_MSG="WARNING" DOCKERME_LOG_WRITE
-		echo $d ": [FAIL] : DELETING BACKUPS OLDER THAN $OLDER_THAN_N_DAYS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+		MESSAGES="DELETING BACKUPS BACKUPS OLDER THAN $OLDER_THAN_N_DAYS DAY(S) FOR $DOMAINE_NAME" STATUS=1 STATUS_MSG="WARNING" DOCKERME_LOG_WRITE
+		echo $d ": [FAIL] : DELETING BACKUPS OLDER THAN $OLDER_THAN_N_DAYS DAY(S) FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
 		exit
 	fi
 }
@@ -1045,8 +1045,8 @@ elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
 elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
-elif [[ " $1 " = *"-b"* ]] && [[ "$2" ]] && [[ "$3" = *"--older"* ]] && [[ "$4" ]] && [[ -z "$5" ]]; then
-	DOMAINE_NAME=$2 OLDER_THAN_N_DAYS=$4 DOCKERME_CONTAINERS_BACKUP_DELETE_OLD
+elif [[ " $1 " = *"-b"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ "$4" = *"--older"* ]] && [[ -z "$5" ]]; then
+	DOMAINE_NAME=$2 OLDER_THAN_N_DAYS=$3 DOCKERME_CONTAINERS_BACKUP_DELETE_OLD
 elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP_LIST
 #elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
