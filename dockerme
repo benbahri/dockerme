@@ -16,7 +16,6 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld"
 	echo "    dockerme -b -s domainename.tld --add        add a crontab from specific domainename.tld"
 	echo "    dockerme -b -s domainename.tld --delete     delete a crontab from specific domainename.tld"
-	echo "    dockerme -r domainename.tld --list          list of backups loaded for specific domainename.tld"
 	echo "    dockerme -r domainename.tld backupfile      restore website volumes for specific domaiename.tld from specific backupfile"
 	echo "    dockerme -rm domainename.tld                remove dockers, volumes, backup and configuration for specific domainename.tld"
 	echo "    dockerme -start domainename.tld             start specific domainename.tld"
@@ -983,8 +982,6 @@ elif [[ " $1 " = *"-b"* ]] && [[ "$2" = *"-s"* ]] && [[ -n "$3" ]] && [[ "$4" = 
  	echo "DOCKERME_BACKUPS_SCHADULED_DELEATE not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
  	DOMAINE_NAME=$2 BACKUP_FILE=$3 DOCKERME_CONTAINERS_BACKUP_RESTORE
-elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" = *"--list"* ]] && [[ -z "$4" ]]; then
- 	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-r"* ]] && [[ "$2" ]] && [[ "$3" ]] && [[ -z "$4" ]]; then
  	echo "DOCKERME_RESTORE_LIST not implemented yet"
 elif [[ " $1 " = *"-rm"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
