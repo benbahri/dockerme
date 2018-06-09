@@ -7,6 +7,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -yml --list                        list of yml files"
 	echo "    dockerme -yml --update                      update yml files"
 	echo "    dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
+	echo "    dockerme -c domainename.tld yml --local     create dockers based on docker-compose from yml with specific domaine with local entry in /etc/host"
 	echo "    dockerme -b domainename.tld                 create backup from specific domainename.tld"
 	echo "    dockerme -b domainename.tld ndays --older   create backup from specific domainename.tld and delete backups older than ndays"
 	echo "    dockerme -b domainename.tld --list          list backup files for specific domainename.tld"
@@ -762,6 +763,131 @@ DOCKERME_CONTAINERS_CREATE(){
 		progress_step
 	done
 }
+DOCKERME_WRITE_LOCAL_ENTRY_ETC_HOST(){
+	if [[ "$YML" == "wordpress4.9.5-php7.0-apache_mysql5.7.22" ]]; then
+		echo "#START ENTRY FOR $DOMAINE_NAME HOSTED BY DOCKERME" >> /etc/hosts
+		echo "127.0.0.1   $DOMAINE_NAME" >> /etc/hosts
+		echo "127.0.0.1   www.$DOMAINE_NAME" >> /etc/hosts
+		echo "127.0.0.1   phpmyadmin.$DOMAINE_NAME" >> /etc/hosts
+		echo "#END ENTRY FOR $DOMAINE_NAME HOSTED BY DOCKERME" >> /etc/hosts
+	else
+		echo "#START ENTRY FOR $DOMAINE_NAME HOSTED BY DOCKERME" >> /etc/hosts
+		echo "127.0.0.1   $DOMAINE_NAME" >> /etc/hosts
+		echo "127.0.0.1   www.$DOMAINE_NAME" >> /etc/hosts
+		echo "#END ENTRY FOR $DOMAINE_NAME HOSTED BY DOCKERME" >> /etc/hosts
+	fi
+}
+DOCKERME_CONTAINERS_CREATE_LOCAL(){
+	PROGRESS_STICKY=yes
+	PROGRESS_WIDTH=100
+	PROGRESS_NUMBER_OF_STEPS=${1:-12}
+	progress_line_number=1
+	DOCKERME_PROGRESS
+	for i in $(seq $PROGRESS_NUMBER_OF_STEPS); do
+		if [[ $i -eq 1 ]]; then
+			MESSAGES="CREATE CONTAINERS" STATUS=1 STATUS_MSG="INITIALIZING" DOCKERME_LOG_WRITE
+			echo $d ": [INITIALIZING] : CREATING CONTAINERS" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 2 ]]; then
+			DOCKERME_IF_NGINX-PROXY_EXIST
+			MESSAGES="CHECK NGINX-PROXY" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+			echo $d ": [OK] : CHEKING NGINX-PROXY CONTAINER" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 3 ]]; then
+			DOCKERME_IF_YML_EXIST $YML
+			MESSAGES="CHECK YML FILE" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+			echo $d ": [OK] : CHEKING YML FILE $DOCKERME_YML_DIRECTORY/$YML" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 4 ]]; then
+			DOMAINE_NAME=$DOMAINE_NAME DOCKERME_IF_WEBSITE_DIRECTORY_EXIST
+			MESSAGES="CHECK IF DOMAINE NAME NOT USED" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+			echo $d ": [OK] : CHEKING IF DOMAINE NAME $DOMAINE_NAME NOT USED" >> $DOCKERME_LOG.log
+		elif [[ $i -eq 5 ]]; then
+			. /$DOCKERME_CONFIG
+			mkdir $HOME_PATH_DIRECTORY/$DOMAINE_NAME 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="CREATE HOME DIRECTORY" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="CREATING HOME DIRECTORY" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : CREATING HOME DIRECTORY $HOME_PATH_DIRECTORY/$DOMAINE_NAME : CODE CC05" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 6 ]]; then
+			. /$DOCKERME_CONFIG
+			touch $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="CREATE DOCKER-COMPOSE.YML AS EMPTY FILE" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="CREATE DOCKER-COMPOSE.YML AS EMPTY FILE" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : CREATING EMPTYFILE $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC06" >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 7 ]]; then
+			. /$DOCKERME_CONFIG
+			cat $DOCKERME_YML_DIRECTORY/$YML > $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="COPY YML FILE IN docker-compose.yml" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="COPYING YML FILE IN docker-compose.yml" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : COPYING $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC07" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 8 ]]; then
+			. /$DOCKERME_CONFIG
+			cd $HOME_PATH_DIRECTORY/$DOMAINE_NAME
+			sudo sed -i -e  's/$host/'$DOMAINE_NAME'/g' docker-compose.yml 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				sudo sed -i -e 's|$path|'$HOME_PATH_DIRECTORY'|g' docker-compose.yml 1>/dev/null 2>&1;
+				if [[ $? -eq 0 ]]; then
+					MESSAGES="COMPOSE docker-compose.yml" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+					echo $d ": [OK] : COMPOSE $YML INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+				else
+					MESSAGES="COMPOSING YML FILE" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+					echo $d ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC08" >> $DOCKERME_LOG.log
+					exit
+				fi
+
+			else
+				echo " * COMPOSING YML FILE\t: [FAIL]"
+				echo $d ": [FAIL] : COMPOSING YML FILE INTO $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC08+" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 9 ]]; then
+			. /$DOCKERME_CONFIG
+			docker-compose up -d 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="START CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : STARTING CONTAINERS FROM $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="STARTING CONTAINERS FROM LOCAL DOCKER-COMPOSE.YML" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : STARTING CONTAINERS FROM $HOME_PATH_DIRECTORY/$DOMAINE_NAME/docker-compose.yml : CODE CC09" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 10 ]]; then
+			docker container restart nginx-proxy 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="APPLICATE CONFIGURATION INSIDE NGINX-PROXY CONTAINER" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : APPLICATING CONFIGURATION INSDE NGINX-PROXY CONTAINER FOR $DOMAINE_NAME : CODE CC10" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 11 ]]; then
+			DOMAINE_NAME=$DOMAINE_NAME YML=$YML DOCKERME_WRITE_LOCAL_ENTRY_ETC_HOST
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="ADD LOCAL ENTRY IN /etc/host FOR $DOMAINE_NAME" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : ADDING LOCAL ENTRY IN /etc/host FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="ADDING LOCAL ENTRY IN /etc/host FOR $DOMAINE_NAME" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : ADDING LOCAL ENTRY IN /etc/host FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+				exit
+			fi
+		elif [[ $i -eq 12 ]]; then
+			MESSAGES="CREATE CONTAINERS" STATUS=1 STATUS_MSG="COMPLETED" DOCKERME_LOG_WRITE
+			echo $d ": [COMPLETED] : CREATE CONTAINERS FOR $DOMAINE_NAME" >> $DOCKERME_LOG.log
+		fi
+		progress_step
+	done
+}
 DOCKERME_CONTAINERS_REMOVE(){
 	PROGRESS_STICKY=yes
 	PROGRESS_WIDTH=100
@@ -1041,6 +1167,8 @@ elif [[ " $1 " = *"-log"* ]] && [[ " $2 " = *"--trancate"* ]] && [[ -z "$3" ]]; 
  	DOCKERME_LOG_TRUNCATE
 elif [[ " $1 " = *"-c"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ -z "$4" ]]; then
  	DOMAINE_NAME=$2 YML=$3 DOCKERME_CONTAINERS_CREATE
+elif [[ " $1 " = *"-c"* ]] && [[ -n "$2" ]] && [[ -n "$3" ]] && [[ "$4" = *"--local"* ]] && [[ -z "$5" ]]; then
+ 	DOMAINE_NAME=$2 YML=$3 DOCKERME_CONTAINERS_CREATE_LOCAL
 elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_BACKUP
 elif [[ " $1 " = *"-b"* ]] && [[ -n "$2" ]] && [[ -z "$3" ]]; then
@@ -1074,5 +1202,3 @@ elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
 else
 	dockerme
 fi
-
-
