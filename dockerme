@@ -1,30 +1,32 @@
 #!/bin/bash
 DOCKERME_SHOW_HELP(){
-	echo " "
-	echo "Usage: dockerme -argument option1 option2 --subarguments"
-	echo " "
-	echo "    dockerme -i                                 install docker system with composer, portainer and nginx-proxy"
-	echo "    dockerme -yml --list                        list of yml files"
-	echo "    dockerme -yml --update                      update yml files"
-	echo "    dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine"
-	echo "    dockerme -c domainename.tld yml --local     create dockers based on docker-compose from yml with specific domaine with local entry in /etc/host"
-	echo "    dockerme -b domainename.tld                 create backup from specific domainename.tld"
-	echo "    dockerme -b domainename.tld ndays --older   create backup from specific domainename.tld and delete backups older than ndays"
-	echo "    dockerme -b domainename.tld --list          list backup files for specific domainename.tld"
-	#echo "    dockerme -b -s domainename.tld              create backup from specific domainename.tld with a crontab"
-	#echo "    dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld"
-	#echo "    dockerme -b -s domainename.tld --add        add a crontab from specific domainename.tld"
-	#echo "    dockerme -b -s domainename.tld --delete     delete a crontab from specific domainename.tld"
-	echo "    dockerme -r domainename.tld backupfile      restore website volumes for specific domaiename.tld from specific backupfile"
-	echo "    dockerme -rm domainename.tld                remove dockers, volumes, backup and configuration for specific domainename.tld"
-	echo "    dockerme -start domainename.tld             start specific domainename.tld"
-	echo "    dockerme -stop domainename.tld              stop specific domainename.tld"
-	echo "    dockerme -log --view                        read docker log file"
-	echo "    dockerme -log --trancate                    trancate docker log file"
-	echo "    dockerme -auditor --dbfs                    Lunch Docker Brech For Security auditing tools"
-	echo "    dockerme -auditor --lynis                   Lunch Lynis auditing tools"
-	echo "    dockerme -u --all                           remove all" 
-	echo " "
+	cat << "EOF"
+          Usage: dockerme -argument option1 option2 --subarguments          
+           
+              dockerme -i                                 install docker system with composer, portainer and nginx-proxy          
+              dockerme -yml --list                        list of yml files          
+              dockerme -yml --update                      update yml files          
+              dockerme -c domainename.tld yml             create dockers based on docker-compose from yml with specific domaine          
+              dockerme -c domainename.tld yml --local     create dockers based on docker-compose from yml with specific domaine with local entry in /etc/host          
+              dockerme -b domainename.tld                 create backup from specific domainename.tld          
+              dockerme -b domainename.tld ndays --older   create backup from specific domainename.tld and delete backups older than ndays          
+              dockerme -b domainename.tld --list          list backup files for specific domainename.tld
+              dockerme -b -s domainename.tld              create backup from specific domainename.tld with a crontab
+              dockerme -b -s domainename.tld --list       list a crontab file from specific domainename.tld
+              dockerme -b -s domainename.tld --add        add a crontab from specific domainename.tld
+              dockerme -b -s domainename.tld --delete     delete a crontab from specific domainename.tld          
+              dockerme -r domainename.tld backupfile      restore website volumes for specific domaiename.tld from specific backupfile          
+              dockerme -rm domainename.tld                remove dockers, volumes, backup and configuration for specific domainename.tld          
+              dockerme -start domainename.tld             start specific domainename.tld          
+              dockerme -stop domainename.tld              stop specific domainename.tld          
+              dockerme -log --view                        read docker log file          
+              dockerme -log --trancate                    trancate docker log file          
+              dockerme -auditor --dbfs                    Lunch Docker Brech For Security auditing tools          
+              dockerme -auditor --lynis                   Lunch Lynis auditing tools          
+              dockerme -u --all                           remove all
+
+
+EOF
 }
 DOCKERME_HEADER(){
 	cat << "EOF"
