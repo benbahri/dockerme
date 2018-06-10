@@ -7,7 +7,7 @@
 	    \/___/  \/___/  \/____/ \/_/\/_/\/____/ \/_/   \/_/ \/_/\/____/
 
 	
-	DockerME V1.0 Mai 2018
+	DockerME V0.4 Mai 2018
 	Docker Hosting Tools
 	by Mind.Engineering
 	https://mind.engineering/
