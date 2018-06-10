@@ -1203,6 +1203,10 @@ DOCKERME_AUDITOR_LYNIS(){
 }
 clear
 DOCKERME_HEADER
+if [[ "$EUID" -ne 0 ]]; then 
+	echo "Please re-run as root #sudo -s"
+	exit
+fi
 DOCKERME_GLOBAL_VARS
 if [[ -z "$1" ]]; then
 	DOCKERME_SHOW_HELP
