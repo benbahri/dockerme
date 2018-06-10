@@ -22,6 +22,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -log --view                        read docker log file"
 	echo "    dockerme -log --trancate                    trancate docker log file"
 	echo "    dockerme -auditor --DockerBenchForSecurity  Lunch Docker Brech For Security auditing tools"
+	echo "    dockerme -auditor --lynis                   Lunch Lynis auditing tools"
 	echo "    dockerme -u --all                           remove all" 
 	echo " "
 }
@@ -538,6 +539,16 @@ DOCKERME_INSTALL(){
 				#exit
 			fi
 		elif [[ $i -eq 18 ]]; then
+			ch $DOCKERME_DIRECTORY
+			git clone https://github.com/CISOfy/lynis.git 1>/dev/null 2>&1;
+			if [[ $? -eq 0 ]]; then
+				MESSAGES="CLONE LYNIS SECURITY AUDITING AND HARDENING TOOLS" STATUS=1 STATUS_MSG="OK" DOCKERME_LOG_WRITE
+				echo $d ": [OK] : CLONE LYNIS SECURITY AUDITING AND HARDENING TOOL" >> $DOCKERME_LOG.log
+			else
+				MESSAGES="CLONE LYNIS SECURITY AUDITING AND HARDENING TOOL" STATUS=0 STATUS_MSG="FAIL" DOCKERME_LOG_WRITE
+				echo $d ": [FAIL] : CLONE LYNIS SECURITY AUDITING AND HARDENING TOOL " >> $DOCKERME_LOG.log
+			fi
+		elif [[ $i -eq 19 ]]; then
 			MESSAGES="DOCKERME SETUP" STATUS=1 STATUS_MSG="COMPLETED" DOCKERME_LOG_WRITE
 			echo $d ": [OK] : DOCKERME SETUP" >> $DOCKERME_LOG.log
 		fi
@@ -1181,6 +1192,13 @@ DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY(){
 		echo $d ": [OK] : LUNCH AUDIT DockerBenchForSecurity" >> $DOCKERME_LOG.log
 	fi
 }
+DOCKERME_AUDITOR_LYNIS(){
+	cd $DOCKERME_DIRECTORY/lynis/
+	./lynis audit system
+    if [[ $? -eq 0 ]]; then
+		echo $d ": [OK] : LUNCH AUDIT LYNIS" >> $DOCKERME_LOG.log
+	fi
+}
 clear
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
@@ -1230,6 +1248,8 @@ elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_STOP
 elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--DockerBenchForSecurity"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY
+elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--lynis"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_AUDITOR_LYNIS
 elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_UNINSTALL
 else
