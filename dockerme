@@ -21,7 +21,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -stop domainename.tld              stop specific domainename.tld"
 	echo "    dockerme -log --view                        read docker log file"
 	echo "    dockerme -log --trancate                    trancate docker log file"
-	echo "    dockerme -auditor --DockerBenchForSecurity  Lunch Docker Brech For Security auditing tools"
+	echo "    dockerme -auditor --dbfs                    Lunch Docker Brech For Security auditing tools"
 	echo "    dockerme -auditor --lynis                   Lunch Lynis auditing tools"
 	echo "    dockerme -u --all                           remove all" 
 	echo " "
@@ -1179,7 +1179,7 @@ DOCKERME_DELETE_OLD_BACKUP(){
 		exit
 	fi
 }
-DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY(){
+DOCKERME_AUDITOR_DBFS(){
 	docker container rm DockerBenchForSecurity 1>/dev/null 2>&1;
 	docker run -it --net host --pid host --userns host --cap-add audit_control \
     -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
@@ -1246,8 +1246,8 @@ elif [[ " $1 " = *"-start"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_START
 elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_STOP
-elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--DockerBenchForSecurity"* ]] && [[ -z "$3" ]]; then
- 	DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY
+elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--dbfs"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_AUDITOR_DBFS
 elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--lynis"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_AUDITOR_LYNIS
 elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
