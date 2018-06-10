@@ -21,6 +21,7 @@ DOCKERME_SHOW_HELP(){
 	echo "    dockerme -stop domainename.tld              stop specific domainename.tld"
 	echo "    dockerme -log --view                        read docker log file"
 	echo "    dockerme -log --trancate                    trancate docker log file"
+	echo "    dockerme -auditor --DockerBenchForSecurity  Lunch Docker Brech For Security auditing tools"
 	echo "    dockerme -u --all                           remove all" 
 	echo " "
 }
@@ -1167,6 +1168,19 @@ DOCKERME_DELETE_OLD_BACKUP(){
 		exit
 	fi
 }
+DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY(){
+	docker container rm DockerBenchForSecurity 1>/dev/null 2>&1;
+	docker run -it --net host --pid host --userns host --cap-add audit_control \
+    -e DOCKER_CONTENT_TRUST=$DOCKER_CONTENT_TRUST \
+    -v /var/lib:/var/lib \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v /usr/lib/systemd:/usr/lib/systemd \
+    -v /etc:/etc --label docker_bench_security \
+    docker/docker-bench-security
+    if [[ $? -eq 0 ]]; then
+		echo $d ": [OK] : LUNCH AUDIT DockerBenchForSecurity" >> $DOCKERME_LOG.log
+	fi
+}
 clear
 DOCKERME_HEADER
 DOCKERME_GLOBAL_VARS
@@ -1214,6 +1228,8 @@ elif [[ " $1 " = *"-start"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_START
 elif [[ " $1 " = *"-stop"* ]] && [[ "$2" ]] && [[ -z "$3" ]]; then
  	DOMAINE_NAME=$2 DOCKERME_CONTAINERS_STOP
+elif [[ " $1 " = *"-auditor"* ]] && [[ "$2" = *"--DockerBenchForSecurity"* ]] && [[ -z "$3" ]]; then
+ 	DOCKERME_AUDITOR_DOCKERBRENSHFORSECUIRITY
 elif [[ " $1 " = *"-u"* ]] && [[ "$2" = *"--all"* ]] && [[ -z "$3" ]]; then
  	DOCKERME_UNINSTALL
 else
